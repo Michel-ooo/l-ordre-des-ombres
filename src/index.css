@@ -1,96 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 45 30% 50%;
+    --accent-foreground: 0 0% 4%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 95%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 100%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Custom tokens */
+    --glow: 0 0% 100%;
+    --lunar: 45 10% 90%;
+    --shadow-deep: 0 0% 2%;
+    --mystic-gold: 45 50% 55%;
+    --blood-dark: 0 40% 20%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 45 30% 50%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 100%;
   }
 }
 
@@ -100,6 +73,188 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer components {
+  .lunar-glow {
+    box-shadow: 
+      0 0 20px hsl(var(--glow) / 0.1),
+      0 0 40px hsl(var(--glow) / 0.05),
+      0 0 60px hsl(var(--glow) / 0.025);
+  }
+
+  .lunar-glow-strong {
+    box-shadow: 
+      0 0 30px hsl(var(--glow) / 0.2),
+      0 0 60px hsl(var(--glow) / 0.1),
+      0 0 100px hsl(var(--glow) / 0.05);
+  }
+
+  .text-glow {
+    text-shadow: 
+      0 0 10px hsl(var(--glow) / 0.5),
+      0 0 20px hsl(var(--glow) / 0.3),
+      0 0 30px hsl(var(--glow) / 0.1);
+  }
+
+  .mystic-border {
+    @apply border border-border/50;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--secondary)) 100%
+    );
+  }
+
+  .ritual-card {
+    @apply relative overflow-hidden rounded-lg;
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(0 0% 3%) 100%
+    );
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .ritual-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-20 pointer-events-none;
+    background: radial-gradient(
+      ellipse at top center,
+      hsl(var(--glow) / 0.1) 0%,
+      transparent 70%
+    );
+  }
+
+  .cipher-input {
+    @apply bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground;
+    @apply focus:ring-1 focus:ring-primary/30 focus:border-primary/50;
+  }
+
+  .nav-link {
+    @apply relative px-4 py-2 text-muted-foreground transition-all duration-300;
+    @apply hover:text-foreground;
+  }
+
+  .nav-link.active {
+    @apply text-foreground;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-primary;
+    @apply transition-all duration-300;
+  }
+
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    @apply w-full;
+  }
+
+  .doctrine-section {
+    @apply relative pl-6 border-l border-border/30;
+  }
+
+  .doctrine-section::before {
+    content: '◆';
+    @apply absolute -left-2 top-0 text-xs text-muted-foreground;
+  }
+
+  .archive-item {
+    @apply p-4 rounded-lg transition-all duration-300;
+    @apply bg-secondary/30 hover:bg-secondary/50;
+    @apply border border-transparent hover:border-border/50;
+  }
+
+  .symbol-glyph {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full;
+    @apply bg-secondary text-foreground text-sm;
+    @apply border border-border/50;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in-slow {
+    animation: fadeIn 1.2s ease-out forwards;
+  }
+
+  .animate-fade-in-delay-1 {
+    animation: fadeIn 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-delay-2 {
+    animation: fadeIn 0.8s ease-out 0.6s forwards;
+    opacity: 0;
+  }
+
+  .animate-fade-in-delay-3 {
+    animation: fadeIn 0.8s ease-out 0.9s forwards;
+    opacity: 0;
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 4s ease-in-out infinite;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
 }
