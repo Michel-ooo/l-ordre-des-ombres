@@ -3,10 +3,17 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import AuthPage from "./pages/AuthPage";
+import InitiationRequestPage from "./pages/InitiationRequestPage";
 import CipherPage from "./pages/CipherPage";
 import DoctrinePage from "./pages/DoctrinePage";
 import ArchivesPage from "./pages/ArchivesPage";
+import GuardianDashboard from "./pages/GuardianDashboard";
+import ReportMemberPage from "./pages/ReportMemberPage";
+import ExitRequestPage from "./pages/ExitRequestPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -17,13 +24,26 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/cipher" element={<CipherPage />} />
-          <Route path="/doctrine" element={<DoctrinePage />} />
-          <Route path="/archives" element={<ArchivesPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/initiation-request" element={<InitiationRequestPage />} />
+            
+            {/* Protected routes */}
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/cipher" element={<ProtectedRoute><CipherPage /></ProtectedRoute>} />
+            <Route path="/doctrine" element={<ProtectedRoute><DoctrinePage /></ProtectedRoute>} />
+            <Route path="/archives" element={<ProtectedRoute><ArchivesPage /></ProtectedRoute>} />
+            <Route path="/report" element={<ProtectedRoute><ReportMemberPage /></ProtectedRoute>} />
+            <Route path="/exit-request" element={<ProtectedRoute><ExitRequestPage /></ProtectedRoute>} />
+            
+            {/* Guardian Supreme only */}
+            <Route path="/guardian" element={<ProtectedRoute requireGuardian><GuardianDashboard /></ProtectedRoute>} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

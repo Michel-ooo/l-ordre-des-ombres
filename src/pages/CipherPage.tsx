@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
 import { MainLayout } from '@/components/MainLayout';
-import { CipherModule } from '@/components/CipherModule';
+import { AdvancedCipherModule } from '@/components/AdvancedCipherModule';
 import { motion } from 'framer-motion';
 import { ArchivedMessage } from '@/components/ArchivesSection';
 
@@ -30,11 +29,11 @@ const CipherPage = () => {
         <div className="text-center mb-12">
           <h1 className="font-heading text-3xl tracking-wide mb-4">Module de Chiffrement</h1>
           <p className="text-muted-foreground">
-            Encodez et décodez vos messages secrets
+            Encodez et décodez vos messages secrets avec le clavier sacré
           </p>
         </div>
 
-        <CipherModule onSaveToArchive={handleSaveToArchive} />
+        <AdvancedCipherModule onSaveToArchive={handleSaveToArchive} />
       </motion.div>
     </MainLayout>
   );
