@@ -161,26 +161,59 @@ const GuardianDashboard = () => {
     fetchData();
   }, []);
 
-  // Approve initiation request
+  // Approve initiation request - create user via edge function
   const handleApproveRequest = async () => {
     if (!selectedRequest || !tempPassword) return;
 
-    // Create the user account via edge function or admin API
-    // For now, we'll show instructions
-    toast({
-      title: "Action requise",
-      description: `Créez manuellement le compte pour ${selectedRequest.email} avec le mot de passe temporaire, puis ajoutez le profil et le rôle.`,
-    });
+    setLoading(true);
 
-    // Update request status
-    await supabase
-      .from('initiation_requests')
-      .update({ status: 'approved', reviewed_by: user?.id, reviewed_at: new Date().toISOString() })
-      .eq('id', selectedRequest.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-actions', {
+        body: {
+          action: 'create_user',
+          email: selectedRequest.email,
+          password: tempPassword,
+          pseudonym: selectedRequest.desired_pseudonym,
+          grade: 'novice',
+        },
+      });
 
-    setSelectedRequest(null);
-    setTempPassword('');
-    fetchData();
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Erreur",
+          description: data.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Update request status
+      await supabase
+        .from('initiation_requests')
+        .update({ status: 'approved', reviewed_by: user?.id, reviewed_at: new Date().toISOString() })
+        .eq('id', selectedRequest.id);
+
+      toast({
+        title: "Initiation réussie",
+        description: `${selectedRequest.desired_pseudonym} a été admis dans l'Ordre.`,
+      });
+
+      setSelectedRequest(null);
+      setTempPassword('');
+      fetchData();
+    } catch (err) {
+      console.error('Approve error:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le compte. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }
+
+    setLoading(false);
   };
 
   // Reject initiation request
@@ -237,28 +270,46 @@ const GuardianDashboard = () => {
     fetchData();
   };
 
-  // Delete member (approve exit or force delete)
+  // Delete member via edge function
   const handleDeleteMember = async () => {
     if (!profileToDelete) return;
 
-    // Delete from auth.users will cascade to profiles
-    const { error } = await supabase.auth.admin.deleteUser(profileToDelete.id);
+    setLoading(true);
 
-    if (error) {
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-actions', {
+        body: {
+          action: 'delete_user',
+          userId: profileToDelete.id,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Erreur",
+          description: data.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Membre exclu",
+          description: `${profileToDelete.pseudonym} a été exclu de l'Ordre.`,
+        });
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
       toast({
         title: "Erreur",
-        description: "Impossible de supprimer ce membre. Une action manuelle peut être requise.",
+        description: "Impossible de supprimer ce membre.",
         variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Membre exclu",
-        description: `${profileToDelete.pseudonym} a été exclu de l'Ordre.`,
       });
     }
 
     setDeleteConfirmOpen(false);
     setProfileToDelete(null);
+    setLoading(false);
     fetchData();
   };
 
@@ -278,27 +329,43 @@ const GuardianDashboard = () => {
 
   // Approve exit request
   const handleApproveExit = async (exitRequest: ExitRequest) => {
+    setLoading(true);
+
     // First update the request
     await supabase
       .from('exit_requests')
       .update({ status: 'approved', reviewed_by: user?.id, reviewed_at: new Date().toISOString() })
       .eq('id', exitRequest.id);
 
-    // Then try to delete the user
-    const { error } = await supabase.auth.admin.deleteUser(exitRequest.user_id);
+    // Then delete the user via edge function
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-actions', {
+        body: {
+          action: 'delete_user',
+          userId: exitRequest.user_id,
+        },
+      });
 
-    if (error) {
+      if (error || data?.error) {
+        toast({
+          title: "Demande approuvée",
+          description: "La demande a été approuvée. Le compte sera supprimé.",
+        });
+      } else {
+        toast({
+          title: "Membre libéré",
+          description: "Le membre a quitté l'Ordre.",
+        });
+      }
+    } catch (err) {
+      console.error('Exit approval error:', err);
       toast({
         title: "Demande approuvée",
-        description: "La demande a été approuvée. Suppression manuelle du compte requise.",
-      });
-    } else {
-      toast({
-        title: "Membre libéré",
-        description: "Le membre a quitté l'Ordre.",
+        description: "La demande a été approuvée.",
       });
     }
 
+    setLoading(false);
     fetchData();
   };
 
@@ -445,7 +512,7 @@ const GuardianDashboard = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Select value={profile.grade} onValueChange={(v) => handleGradeChange(profile.id, v)}>
+                      <Select value={profile.grade} onValueChange={(v) => handleGradeChange(profile.id, v as 'novice' | 'apprenti' | 'compagnon' | 'maitre' | 'sage' | 'oracle')}>
                         <SelectTrigger className="w-[130px] h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
@@ -455,7 +522,7 @@ const GuardianDashboard = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <Select value={profile.status} onValueChange={(v) => handleStatusChange(profile.id, v)}>
+                      <Select value={profile.status} onValueChange={(v) => handleStatusChange(profile.id, v as 'active' | 'under_surveillance' | 'pending' | 'exclusion_requested')}>
                         <SelectTrigger className="w-[150px] h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
