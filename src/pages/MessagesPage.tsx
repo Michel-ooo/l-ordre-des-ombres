@@ -1,36 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MainLayout } from "@/components/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Mail, 
   Send, 
-  Inbox, 
-  ChevronLeft, 
-  Trash2,
+  ChevronLeft,
   Circle,
-  RefreshCw
+  MessageCircle
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Message {
   id: string;
@@ -40,8 +23,6 @@ interface Message {
   content: string;
   is_read: boolean;
   created_at: string;
-  sender?: { pseudonym: string };
-  recipient?: { pseudonym: string };
 }
 
 interface Member {
@@ -49,57 +30,44 @@ interface Member {
   pseudonym: string;
 }
 
+interface Conversation {
+  memberId: string;
+  pseudonym: string;
+  lastMessage: Message;
+  unreadCount: number;
+}
+
 const MessagesPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [inbox, setInbox] = useState<Message[]>([]);
-  const [sent, setSent] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isComposing, setIsComposing] = useState(false);
-  
-  // Compose form state
-  const [recipientId, setRecipientId] = useState("");
-  const [subject, setSubject] = useState("");
-  const [content, setContent] = useState("");
+  const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const fetchMessages = async () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const fetchAllMessages = async () => {
     if (!user) return;
     
     setIsLoading(true);
     
-    // Fetch inbox (received messages)
-    const { data: inboxData, error: inboxError } = await supabase
+    const { data, error } = await supabase
       .from("messages")
-      .select(`
-        *,
-        sender:profiles!messages_sender_id_fkey(pseudonym)
-      `)
-      .eq("recipient_id", user.id)
-      .order("created_at", { ascending: false });
+      .select("*")
+      .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+      .order("created_at", { ascending: true });
     
-    if (inboxError) {
-      console.error("Error fetching inbox:", inboxError);
+    if (error) {
+      console.error("Error fetching messages:", error);
     } else {
-      setInbox(inboxData || []);
-    }
-    
-    // Fetch sent messages
-    const { data: sentData, error: sentError } = await supabase
-      .from("messages")
-      .select(`
-        *,
-        recipient:profiles!messages_recipient_id_fkey(pseudonym)
-      `)
-      .eq("sender_id", user.id)
-      .order("created_at", { ascending: false });
-    
-    if (sentError) {
-      console.error("Error fetching sent:", sentError);
-    } else {
-      setSent(sentData || []);
+      setMessages(data || []);
     }
     
     setIsLoading(false);
@@ -121,27 +89,66 @@ const MessagesPage = () => {
     }
   };
 
+  // Build conversations from messages
   useEffect(() => {
-    fetchMessages();
+    if (!user || !members.length) return;
+
+    const convMap = new Map<string, Conversation>();
+    
+    messages.forEach(msg => {
+      const otherId = msg.sender_id === user.id ? msg.recipient_id : msg.sender_id;
+      const member = members.find(m => m.id === otherId);
+      if (!member) return;
+      
+      const existing = convMap.get(otherId);
+      const isUnread = msg.recipient_id === user.id && !msg.is_read;
+      
+      if (!existing || new Date(msg.created_at) > new Date(existing.lastMessage.created_at)) {
+        convMap.set(otherId, {
+          memberId: otherId,
+          pseudonym: member.pseudonym,
+          lastMessage: msg,
+          unreadCount: (existing?.unreadCount || 0) + (isUnread ? 1 : 0)
+        });
+      } else if (isUnread) {
+        existing.unreadCount++;
+      }
+    });
+    
+    const sortedConvs = Array.from(convMap.values()).sort(
+      (a, b) => new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
+    );
+    
+    setConversations(sortedConvs);
+  }, [messages, members, user]);
+
+  useEffect(() => {
+    fetchAllMessages();
     fetchMembers();
     
     // Subscribe to new messages
     const channel = supabase
-      .channel("messages-changes")
+      .channel("messages-realtime")
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "messages",
-          filter: `recipient_id=eq.${user?.id}`,
         },
         (payload) => {
-          toast({
-            title: "📬 Nouveau message",
-            description: "Vous avez reçu un nouveau message.",
-          });
-          fetchMessages();
+          if (payload.eventType === "INSERT") {
+            const newMsg = payload.new as Message;
+            if (newMsg.sender_id === user?.id || newMsg.recipient_id === user?.id) {
+              setMessages(prev => [...prev, newMsg]);
+              if (newMsg.recipient_id === user?.id && newMsg.sender_id !== selectedMember?.id) {
+                toast({
+                  title: "💬 Nouveau message",
+                  description: "Vous avez reçu un nouveau message.",
+                });
+              }
+            }
+          }
         }
       )
       .subscribe();
@@ -151,23 +158,43 @@ const MessagesPage = () => {
     };
   }, [user]);
 
-  const handleSendMessage = async () => {
-    if (!recipientId || !subject || !content) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez remplir tous les champs.",
-        variant: "destructive",
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, selectedMember]);
+
+  // Mark messages as read when opening conversation
+  useEffect(() => {
+    if (!selectedMember || !user) return;
+    
+    const unreadMessages = messages.filter(
+      m => m.sender_id === selectedMember.id && m.recipient_id === user.id && !m.is_read
+    );
+    
+    if (unreadMessages.length > 0) {
+      Promise.all(
+        unreadMessages.map(m => 
+          supabase.from("messages").update({ is_read: true }).eq("id", m.id)
+        )
+      ).then(() => {
+        setMessages(prev => 
+          prev.map(m => 
+            unreadMessages.some(u => u.id === m.id) ? { ...m, is_read: true } : m
+          )
+        );
       });
-      return;
     }
+  }, [selectedMember, user]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedMember) return;
     
     setIsSending(true);
     
     const { error } = await supabase.from("messages").insert({
       sender_id: user?.id,
-      recipient_id: recipientId,
-      subject,
-      content,
+      recipient_id: selectedMember.id,
+      subject: "SMS",
+      content: newMessage.trim(),
     });
     
     if (error) {
@@ -178,305 +205,225 @@ const MessagesPage = () => {
         variant: "destructive",
       });
     } else {
-      toast({
-        title: "Message envoyé",
-        description: "Votre message a été transmis avec succès.",
-      });
-      setRecipientId("");
-      setSubject("");
-      setContent("");
-      setIsComposing(false);
-      fetchMessages();
+      setNewMessage("");
     }
     
     setIsSending(false);
   };
 
-  const handleOpenMessage = async (message: Message) => {
-    setSelectedMessage(message);
-    
-    // Mark as read if it's in inbox and unread
-    if (message.recipient_id === user?.id && !message.is_read) {
-      await supabase
-        .from("messages")
-        .update({ is_read: true })
-        .eq("id", message.id);
-      
-      setInbox(prev => 
-        prev.map(m => m.id === message.id ? { ...m, is_read: true } : m)
-      );
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
-    const { error } = await supabase
-      .from("messages")
-      .delete()
-      .eq("id", messageId);
-    
-    if (error) {
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le message.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Message supprimé",
-        description: "Le message a été supprimé.",
-      });
-      setSelectedMessage(null);
-      fetchMessages();
-    }
+  const getConversationMessages = () => {
+    if (!selectedMember || !user) return [];
+    return messages.filter(
+      m => (m.sender_id === selectedMember.id && m.recipient_id === user.id) ||
+           (m.sender_id === user.id && m.recipient_id === selectedMember.id)
+    );
   };
 
-  const unreadCount = inbox.filter(m => !m.is_read).length;
-
-  const formatDate = (dateStr: string) => {
+  const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("fr-FR", {
-      day: "numeric",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    } else if (diffDays === 1) {
+      return "Hier";
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString("fr-FR", { weekday: "short" });
+    }
+    return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   };
 
-  const MessageList = ({ messages, type }: { messages: Message[]; type: "inbox" | "sent" }) => (
-    <div className="space-y-2">
-      {messages.length === 0 ? (
-        <p className="text-muted-foreground text-center py-8">
-          Aucun message
-        </p>
-      ) : (
-        messages.map((message) => (
-          <motion.div
-            key={message.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`p-4 border border-primary/20 rounded-lg cursor-pointer transition-all hover:border-primary/50 hover:bg-primary/5 ${
-              !message.is_read && type === "inbox" ? "bg-primary/10 border-primary/40" : ""
-            }`}
-            onClick={() => handleOpenMessage(message)}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-2 min-w-0">
-                {!message.is_read && type === "inbox" && (
-                  <Circle className="w-2 h-2 fill-primary text-primary flex-shrink-0" />
-                )}
-                <span className="font-medium text-primary truncate">
-                  {type === "inbox" 
-                    ? message.sender?.pseudonym || "Inconnu"
-                    : message.recipient?.pseudonym || "Inconnu"
-                  }
-                </span>
-              </div>
-              <span className="text-xs text-muted-foreground flex-shrink-0">
-                {formatDate(message.created_at)}
-              </span>
-            </div>
-            <p className="font-semibold mt-1 truncate">{message.subject}</p>
-            <p className="text-sm text-muted-foreground truncate mt-1">
-              {message.content}
-            </p>
-          </motion.div>
-        ))
-      )}
-    </div>
-  );
+  const totalUnread = conversations.reduce((acc, c) => acc + c.unreadCount, 0);
 
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
-          >
-            <Mail className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-primary font-cinzel">
-              Messagerie Secrète
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Communications internes de l'Ordre
-            </p>
-          </motion.div>
-
+      <div className="min-h-[calc(100vh-12rem)] bg-gradient-to-b from-background via-background to-primary/5">
+        <div className="max-w-2xl mx-auto">
           <AnimatePresence mode="wait">
-            {selectedMessage ? (
+            {selectedMember ? (
+              // Chat View
               <motion.div
-                key="message-detail"
+                key="chat"
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="bg-card border border-primary/20 rounded-lg p-6"
+                className="flex flex-col h-[calc(100vh-12rem)]"
               >
-                <div className="flex items-center justify-between mb-6">
+                {/* Chat Header */}
+                <div className="flex items-center gap-3 p-4 border-b border-primary/20 bg-card/50 backdrop-blur-sm">
                   <Button
                     variant="ghost"
-                    onClick={() => setSelectedMessage(null)}
-                    className="gap-2"
+                    size="icon"
+                    onClick={() => setSelectedMember(null)}
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                    Retour
+                    <ChevronLeft className="w-5 h-5" />
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleDeleteMessage(selectedMessage.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex-1">
+                    <h2 className="font-semibold text-primary font-cinzel">
+                      {selectedMember.pseudonym}
+                    </h2>
+                  </div>
                 </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedMessage.sender_id === user?.id ? "À:" : "De:"}
-                      </p>
-                      <p className="font-semibold text-primary">
-                        {selectedMessage.sender_id === user?.id
-                          ? selectedMessage.recipient?.pseudonym
-                          : selectedMessage.sender?.pseudonym
-                        }
-                      </p>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {formatDate(selectedMessage.created_at)}
-                    </span>
+
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-3">
+                    {getConversationMessages().map((message) => {
+                      const isMine = message.sender_id === user?.id;
+                      return (
+                        <motion.div
+                          key={message.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[80%] px-4 py-2 rounded-2xl ${
+                              isMine
+                                ? "bg-primary text-primary-foreground rounded-br-md"
+                                : "bg-muted rounded-bl-md"
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap break-words">
+                              {message.content}
+                            </p>
+                            <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                              {formatTime(message.created_at)}
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                    <div ref={messagesEndRef} />
                   </div>
-                  
-                  <div>
-                    <p className="text-sm text-muted-foreground">Sujet:</p>
-                    <p className="text-xl font-semibold">{selectedMessage.subject}</p>
-                  </div>
-                  
-                  <div className="border-t border-primary/20 pt-4">
-                    <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
+                </ScrollArea>
+
+                {/* Input */}
+                <div className="p-4 border-t border-primary/20 bg-card/50 backdrop-blur-sm">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Message..."
+                      className="flex-1"
+                      disabled={isSending}
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim() || isSending}
+                      size="icon"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </motion.div>
             ) : (
+              // Conversations List
               <motion.div
-                key="message-list"
+                key="list"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                className="p-4"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <Dialog open={isComposing} onOpenChange={setIsComposing}>
-                    <DialogTrigger asChild>
-                      <Button className="gap-2">
-                        <Send className="w-4 h-4" />
-                        Nouveau message
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-lg">
-                      <DialogHeader>
-                        <DialogTitle className="font-cinzel text-primary">
-                          Nouveau Message
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 mt-4">
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">
-                            Destinataire
-                          </label>
-                          <Select value={recipientId} onValueChange={setRecipientId}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choisir un membre..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {members.map((member) => (
-                                <SelectItem key={member.id} value={member.id}>
-                                  {member.pseudonym}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">
-                            Sujet
-                          </label>
-                          <Input
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            placeholder="Sujet du message..."
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium mb-2 block">
-                            Message
-                          </label>
-                          <Textarea
-                            value={content}
-                            onChange={(e) => setContent(e.target.value)}
-                            placeholder="Votre message..."
-                            rows={6}
-                          />
-                        </div>
-                        <Button 
-                          onClick={handleSendMessage} 
-                          disabled={isSending}
-                          className="w-full gap-2"
-                        >
-                          <Send className="w-4 h-4" />
-                          {isSending ? "Envoi..." : "Envoyer"}
-                        </Button>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={fetchMessages}
-                    disabled={isLoading}
-                  >
-                    <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
-                  </Button>
+                <div className="text-center mb-6">
+                  <MessageCircle className="w-12 h-12 text-primary mx-auto mb-3" />
+                  <h1 className="text-2xl font-bold text-primary font-cinzel">
+                    Messages
+                  </h1>
+                  {totalUnread > 0 && (
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {totalUnread} message{totalUnread > 1 ? "s" : ""} non lu{totalUnread > 1 ? "s" : ""}
+                    </p>
+                  )}
                 </div>
 
-                <Tabs defaultValue="inbox" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="inbox" className="gap-2">
-                      <Inbox className="w-4 h-4" />
-                      Reçus
-                      {unreadCount > 0 && (
-                        <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </TabsTrigger>
-                    <TabsTrigger value="sent" className="gap-2">
-                      <Send className="w-4 h-4" />
-                      Envoyés
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="inbox">
-                    {isLoading ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        Chargement...
-                      </div>
-                    ) : (
-                      <MessageList messages={inbox} type="inbox" />
-                    )}
-                  </TabsContent>
-                  
-                  <TabsContent value="sent">
-                    {isLoading ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        Chargement...
-                      </div>
-                    ) : (
-                      <MessageList messages={sent} type="sent" />
-                    )}
-                  </TabsContent>
-                </Tabs>
+                {/* New Conversation Button */}
+                <div className="mb-4">
+                  <select
+                    className="w-full p-3 rounded-lg bg-card border border-primary/20 text-foreground"
+                    onChange={(e) => {
+                      const member = members.find(m => m.id === e.target.value);
+                      if (member) setSelectedMember(member);
+                      e.target.value = "";
+                    }}
+                    value=""
+                  >
+                    <option value="" disabled>+ Nouvelle conversation...</option>
+                    {members.map(member => (
+                      <option key={member.id} value={member.id}>
+                        {member.pseudonym}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Conversations */}
+                <div className="space-y-2">
+                  {isLoading ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      Chargement...
+                    </p>
+                  ) : conversations.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      Aucune conversation
+                    </p>
+                  ) : (
+                    conversations.map((conv) => (
+                      <motion.div
+                        key={conv.memberId}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`p-4 rounded-lg cursor-pointer transition-all border ${
+                          conv.unreadCount > 0 
+                            ? "bg-primary/10 border-primary/40" 
+                            : "bg-card/50 border-primary/20 hover:border-primary/40"
+                        }`}
+                        onClick={() => {
+                          const member = members.find(m => m.id === conv.memberId);
+                          if (member) setSelectedMember(member);
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {conv.unreadCount > 0 && (
+                              <Circle className="w-2 h-2 fill-primary text-primary flex-shrink-0" />
+                            )}
+                            <div className="min-w-0">
+                              <p className="font-semibold text-primary truncate">
+                                {conv.pseudonym}
+                              </p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {conv.lastMessage.sender_id === user?.id ? "Vous: " : ""}
+                                {conv.lastMessage.content}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground">
+                              {formatTime(conv.lastMessage.created_at)}
+                            </span>
+                            {conv.unreadCount > 0 && (
+                              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded-full">
+                                {conv.unreadCount}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
