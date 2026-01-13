@@ -14,16 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      exit_requests: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["initiation_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["initiation_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["initiation_status"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      initiation_requests: {
+        Row: {
+          created_at: string
+          desired_pseudonym: string
+          email: string
+          id: string
+          motivation: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["initiation_status"]
+        }
+        Insert: {
+          created_at?: string
+          desired_pseudonym: string
+          email: string
+          id?: string
+          motivation: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["initiation_status"]
+        }
+        Update: {
+          created_at?: string
+          desired_pseudonym?: string
+          email?: string
+          id?: string
+          motivation?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["initiation_status"]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          grade: Database["public"]["Enums"]["initiate_grade"]
+          id: string
+          joined_at: string
+          pseudonym: string
+          status: Database["public"]["Enums"]["member_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          grade?: Database["public"]["Enums"]["initiate_grade"]
+          id: string
+          joined_at?: string
+          pseudonym: string
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          grade?: Database["public"]["Enums"]["initiate_grade"]
+          id?: string
+          joined_at?: string
+          pseudonym?: string
+          status?: Database["public"]["Enums"]["member_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          is_reviewed: boolean
+          reason: string
+          reported_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_reviewed?: boolean
+          reason: string
+          reported_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_reviewed?: boolean
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_guardian_supreme: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "guardian_supreme" | "initiate"
+      initiate_grade:
+        | "novice"
+        | "apprenti"
+        | "compagnon"
+        | "maitre"
+        | "sage"
+        | "oracle"
+      initiation_status: "pending" | "approved" | "rejected"
+      member_status:
+        | "active"
+        | "under_surveillance"
+        | "pending"
+        | "exclusion_requested"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +319,23 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["guardian_supreme", "initiate"],
+      initiate_grade: [
+        "novice",
+        "apprenti",
+        "compagnon",
+        "maitre",
+        "sage",
+        "oracle",
+      ],
+      initiation_status: ["pending", "approved", "rejected"],
+      member_status: [
+        "active",
+        "under_surveillance",
+        "pending",
+        "exclusion_requested",
+      ],
+    },
   },
 } as const
