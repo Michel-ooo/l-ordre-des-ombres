@@ -14,6 +14,7 @@ import ArchivesPage from "./pages/ArchivesPage";
 import GuardianDashboard from "./pages/GuardianDashboard";
 import ReportMemberPage from "./pages/ReportMemberPage";
 import ExitRequestPage from "./pages/ExitRequestPage";
+import MessagesPage from "./pages/MessagesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/cipher" element={<ProtectedRoute><CipherPage /></ProtectedRoute>} />
             <Route path="/doctrine" element={<ProtectedRoute><DoctrinePage /></ProtectedRoute>} />
             <Route path="/archives" element={<ProtectedRoute><ArchivesPage /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ReportMemberPage /></ProtectedRoute>} />
             <Route path="/exit-request" element={<ProtectedRoute><ExitRequestPage /></ProtectedRoute>} />
             
