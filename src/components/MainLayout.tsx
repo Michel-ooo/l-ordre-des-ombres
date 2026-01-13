@@ -1,6 +1,15 @@
 import { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Lock, Scroll, Archive, Home } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import logo from '@/assets/logo-ordre.png';
 
 interface MainLayoutProps {
@@ -16,6 +25,13 @@ const navItems = [
 
 export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, isGuardianSupreme, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,7 +52,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center">
+            <nav className="flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -52,6 +68,49 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Link>
                 );
               })}
+
+              {/* Guardian link */}
+              {isGuardianSupreme && (
+                <Link
+                  to="/guardian"
+                  className={`nav-link flex items-center gap-2 text-mystic-gold ${location.pathname === '/guardian' ? 'active' : ''}`}
+                >
+                  <Shield className="w-4 h-4" />
+                  <span className="hidden md:inline text-sm font-heading tracking-wide">
+                    Gardien
+                  </span>
+                </Link>
+              )}
+
+              {/* User Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="ml-2 gap-2 text-xs font-heading">
+                    <span className="hidden sm:inline">{profile?.pseudonym || 'Initié'}</span>
+                    <span className="sm:hidden">☽</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-card border-border">
+                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
+                    {profile?.pseudonym}
+                    <span className="block text-[10px] capitalize">{profile?.grade}</span>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/report')} className="gap-2 cursor-pointer">
+                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                    Signaler un membre
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/exit-request')} className="gap-2 cursor-pointer text-red-400">
+                    <DoorOpen className="w-4 h-4" />
+                    Quitter l'Ordre
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 cursor-pointer">
+                    <LogOut className="w-4 h-4" />
+                    Déconnexion
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </nav>
           </div>
         </div>
