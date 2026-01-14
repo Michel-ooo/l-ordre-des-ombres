@@ -17,11 +17,11 @@ import {
   Shield,
   Check,
   X,
-  ChevronUp,
-  ChevronDown,
   Eye,
   Trash2,
   Search,
+  Edit,
+  Plus,
 } from 'lucide-react';
 import {
   Dialog,
@@ -120,6 +120,22 @@ const GuardianDashboard = () => {
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [profileToDelete, setProfileToDelete] = useState<Profile | null>(null);
+  
+  // Create account dialog
+  const [createAccountOpen, setCreateAccountOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPseudonym, setNewPseudonym] = useState('');
+  const [newGrade, setNewGrade] = useState<string>('novice');
+  
+  // Edit profile dialog
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [editPseudonym, setEditPseudonym] = useState('');
+  const [editGrade, setEditGrade] = useState('');
+  const [editStatus, setEditStatus] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
 
   // Fetch all data
   const fetchData = async () => {
@@ -313,6 +329,113 @@ const GuardianDashboard = () => {
     fetchData();
   };
 
+  // Create account directly
+  const handleCreateAccount = async () => {
+    if (!newEmail || !newPassword || !newPseudonym) return;
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-actions', {
+        body: {
+          action: 'create_user',
+          email: newEmail,
+          password: newPassword,
+          pseudonym: newPseudonym,
+          grade: newGrade,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Erreur",
+          description: data.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Compte créé",
+          description: `${newPseudonym} a été admis dans l'Ordre.`,
+        });
+        setCreateAccountOpen(false);
+        setNewEmail('');
+        setNewPassword('');
+        setNewPseudonym('');
+        setNewGrade('novice');
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Create account error:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer le compte.",
+        variant: "destructive",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  // Update profile (including password)
+  const handleUpdateProfile = async () => {
+    if (!editingProfile) return;
+
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-actions', {
+        body: {
+          action: 'update_user',
+          targetUserId: editingProfile.id,
+          email: editEmail || undefined,
+          password: editPassword || undefined,
+          pseudonym: editPseudonym || undefined,
+          grade: editGrade || undefined,
+          status: editStatus || undefined,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.error) {
+        toast({
+          title: "Erreur",
+          description: data.error,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Profil mis à jour",
+          description: `Les informations de ${editingProfile.pseudonym} ont été modifiées.`,
+        });
+        setEditProfileOpen(false);
+        setEditingProfile(null);
+        fetchData();
+      }
+    } catch (err) {
+      console.error('Update profile error:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour le profil.",
+        variant: "destructive",
+      });
+    }
+
+    setLoading(false);
+  };
+
+  const openEditProfile = (profile: Profile) => {
+    setEditingProfile(profile);
+    setEditPseudonym(profile.pseudonym);
+    setEditGrade(profile.grade);
+    setEditStatus(profile.status);
+    setEditEmail('');
+    setEditPassword('');
+    setEditProfileOpen(true);
+  };
+
   // Mark report as reviewed
   const handleMarkReportReviewed = async (reportId: string) => {
     await supabase
@@ -487,14 +610,20 @@ const GuardianDashboard = () => {
 
           {/* Directory Tab */}
           <TabsContent value="directory" className="space-y-4">
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Rechercher un initié..."
-                className="pl-10 cipher-input"
-              />
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Rechercher un initié..."
+                  className="pl-10 cipher-input"
+                />
+              </div>
+              <Button onClick={() => setCreateAccountOpen(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">Créer un compte</span>
+              </Button>
             </div>
             
             {loading ? (
@@ -532,6 +661,14 @@ const GuardianDashboard = () => {
                           ))}
                         </SelectContent>
                       </Select>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openEditProfile(profile)}
+                        className="text-primary hover:text-primary"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -714,6 +851,153 @@ const GuardianDashboard = () => {
               <Button variant="destructive" onClick={handleDeleteMember}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Confirmer l'exclusion
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Account Dialog */}
+        <Dialog open={createAccountOpen} onOpenChange={setCreateAccountOpen}>
+          <DialogContent className="bg-card border-border max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Créer un compte</DialogTitle>
+              <DialogDescription>
+                Créez directement un compte pour un nouvel initié sans passer par une demande.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Email</label>
+                <Input
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="email@exemple.com"
+                  className="cipher-input"
+                  type="email"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Pseudonyme</label>
+                <Input
+                  value={newPseudonym}
+                  onChange={(e) => setNewPseudonym(e.target.value)}
+                  placeholder="Pseudonyme mystique..."
+                  className="cipher-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Mot de passe</label>
+                <Input
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mot de passe..."
+                  className="cipher-input"
+                  type="password"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Grade initial</label>
+                <Select value={newGrade} onValueChange={setNewGrade}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {grades.map((g) => (
+                      <SelectItem key={g} value={g}>{gradeLabels[g]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setCreateAccountOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleCreateAccount} disabled={!newEmail || !newPassword || !newPseudonym || loading}>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Créer le compte
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Profile Dialog */}
+        <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
+          <DialogContent className="bg-card border-border max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Modifier un initié</DialogTitle>
+              <DialogDescription>
+                Modifiez toutes les informations de {editingProfile?.pseudonym}, y compris le mot de passe.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Pseudonyme</label>
+                <Input
+                  value={editPseudonym}
+                  onChange={(e) => setEditPseudonym(e.target.value)}
+                  placeholder="Pseudonyme..."
+                  className="cipher-input"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Email (laisser vide pour ne pas modifier)</label>
+                <Input
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  placeholder="Nouvel email..."
+                  className="cipher-input"
+                  type="email"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Nouveau mot de passe (laisser vide pour ne pas modifier)</label>
+                <Input
+                  value={editPassword}
+                  onChange={(e) => setEditPassword(e.target.value)}
+                  placeholder="Nouveau mot de passe..."
+                  className="cipher-input"
+                  type="password"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Grade</label>
+                <Select value={editGrade} onValueChange={setEditGrade}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {grades.map((g) => (
+                      <SelectItem key={g} value={g}>{gradeLabels[g]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Statut</label>
+                <Select value={editStatus} onValueChange={setEditStatus}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(statusLabels).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setEditProfileOpen(false)}>
+                Annuler
+              </Button>
+              <Button onClick={handleUpdateProfile} disabled={loading}>
+                <Check className="w-4 h-4 mr-2" />
+                Enregistrer
               </Button>
             </DialogFooter>
           </DialogContent>

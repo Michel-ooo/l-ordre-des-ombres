@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { 
-  Mail, 
   Send, 
   ChevronLeft,
   Circle,
-  MessageCircle
+  MessageCircle,
+  Crown
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { EmojiPicker } from "@/components/EmojiPicker";
 
 interface Message {
   id: string;
@@ -38,10 +39,11 @@ interface Conversation {
 }
 
 const MessagesPage = () => {
-  const { user } = useAuth();
+  const { user, isGuardianSupreme } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [guardianId, setGuardianId] = useState<string | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,6 +78,7 @@ const MessagesPage = () => {
   const fetchMembers = async () => {
     if (!user) return;
     
+    // Fetch all active members
     const { data, error } = await supabase
       .from("profiles")
       .select("id, pseudonym")
@@ -86,6 +89,17 @@ const MessagesPage = () => {
       console.error("Error fetching members:", error);
     } else {
       setMembers(data || []);
+    }
+
+    // Fetch Guardian Supreme ID
+    const { data: guardianData } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "guardian_supreme")
+      .maybeSingle();
+    
+    if (guardianData) {
+      setGuardianId(guardianData.user_id);
     }
   };
 
@@ -308,7 +322,8 @@ const MessagesPage = () => {
 
                 {/* Input */}
                 <div className="p-4 border-t border-primary/20 bg-card/50 backdrop-blur-sm">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-center">
+                    <EmojiPicker onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} />
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
@@ -348,6 +363,28 @@ const MessagesPage = () => {
                   )}
                 </div>
 
+                {/* Contact Guardian Button */}
+                {!isGuardianSupreme && guardianId && (
+                  <Button
+                    variant="outline"
+                    className="w-full mb-4 gap-2 border-mystic-gold/50 text-mystic-gold hover:bg-mystic-gold/10"
+                    onClick={() => {
+                      const guardian = members.find(m => m.id === guardianId);
+                      if (guardian) {
+                        setSelectedMember(guardian);
+                      } else {
+                        // Guardian might not be in members list if already conversing
+                        supabase.from("profiles").select("id, pseudonym").eq("id", guardianId).maybeSingle().then(({ data }) => {
+                          if (data) setSelectedMember(data);
+                        });
+                      }
+                    }}
+                  >
+                    <Crown className="w-4 h-4" />
+                    Contacter le Gardien Suprême
+                  </Button>
+                )}
+
                 {/* New Conversation Button */}
                 <div className="mb-4">
                   <select
@@ -362,7 +399,7 @@ const MessagesPage = () => {
                     <option value="" disabled>+ Nouvelle conversation...</option>
                     {members.map(member => (
                       <option key={member.id} value={member.id}>
-                        {member.pseudonym}
+                        {member.pseudonym} {member.id === guardianId ? '👑' : ''}
                       </option>
                     ))}
                   </select>
