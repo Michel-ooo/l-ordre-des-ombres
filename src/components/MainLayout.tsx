@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, isGuardianSupreme, signOut } = useAuth();
+  const { unreadCount } = useUnreadMessages();
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,16 +58,22 @@ export function MainLayout({ children }: MainLayoutProps) {
             <nav className="flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
+                const isMessages = item.path === '/messages';
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`nav-link flex items-center gap-2 ${isActive ? 'active' : ''}`}
+                    className={`nav-link flex items-center gap-2 relative ${isActive ? 'active' : ''}`}
                   >
                     <item.icon className="w-4 h-4" />
                     <span className="hidden md:inline text-sm font-heading tracking-wide">
                       {item.label}
                     </span>
+                    {isMessages && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}

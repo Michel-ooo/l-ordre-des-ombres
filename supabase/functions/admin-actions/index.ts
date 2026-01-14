@@ -134,6 +134,65 @@ serve(async (req) => {
         );
       }
 
+      case 'update_user': {
+        const { targetUserId, email, password, pseudonym, grade, status } = data;
+
+        if (!targetUserId) {
+          return new Response(
+            JSON.stringify({ error: 'ID utilisateur requis' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+
+        // Update auth (email and/or password)
+        const authUpdates: { email?: string; password?: string } = {};
+        if (email) authUpdates.email = email;
+        if (password) authUpdates.password = password;
+
+        if (Object.keys(authUpdates).length > 0) {
+          const { error: authError } = await adminClient.auth.admin.updateUserById(
+            targetUserId,
+            authUpdates
+          );
+
+          if (authError) {
+            console.error('Auth update error:', authError);
+            return new Response(
+              JSON.stringify({ error: `Erreur mise à jour auth: ${authError.message}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+
+        // Update profile
+        const profileUpdates: { pseudonym?: string; grade?: string; status?: string } = {};
+        if (pseudonym) profileUpdates.pseudonym = pseudonym;
+        if (grade) profileUpdates.grade = grade;
+        if (status) profileUpdates.status = status;
+
+        if (Object.keys(profileUpdates).length > 0) {
+          const { error: profileError } = await adminClient
+            .from('profiles')
+            .update(profileUpdates)
+            .eq('id', targetUserId);
+
+          if (profileError) {
+            console.error('Profile update error:', profileError);
+            return new Response(
+              JSON.stringify({ error: `Erreur mise à jour profil: ${profileError.message}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+        }
+
+        console.log('User updated successfully:', targetUserId);
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
       case 'delete_user': {
         const { userId: targetUserId } = data;
 
