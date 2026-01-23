@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, MessageSquare, Send, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CouncilVotingSection } from './CouncilVotingSection';
 
 interface CouncilOpinion {
   id: string;
@@ -447,7 +448,11 @@ export function CouncilChamberTab() {
                 </div>
               )}
 
-              {/* Comments section */}
+              {/* Voting Section */}
+              <CouncilVotingSection 
+                opinionId={selectedOpinion.id} 
+                opinionStatus={selectedOpinion.status} 
+              />
               <div className="border-t pt-4">
                 <Label className="text-xs text-muted-foreground flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" />
