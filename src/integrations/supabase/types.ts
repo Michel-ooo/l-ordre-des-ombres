@@ -224,7 +224,7 @@ export type Database = {
       is_guardian_supreme: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "guardian_supreme" | "initiate"
+      app_role: "guardian_supreme" | "initiate" | "archonte"
       initiate_grade:
         | "novice"
         | "apprenti"
@@ -365,7 +365,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["guardian_supreme", "initiate"],
+      app_role: ["guardian_supreme", "initiate", "archonte"],
       initiate_grade: [
         "novice",
         "apprenti",
