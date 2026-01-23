@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_history: {
+        Row: {
+          action_type: Database["public"]["Enums"]["action_type"]
+          actor_id: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action_type: Database["public"]["Enums"]["action_type"]
+          actor_id: string
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action_type?: Database["public"]["Enums"]["action_type"]
+          actor_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       council_opinions: {
         Row: {
           created_at: string
@@ -63,6 +96,83 @@ export type Database = {
             columns: ["file_id"]
             isOneToOne: false
             referencedRelation: "knowledge_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      council_requests: {
+        Row: {
+          council_response: string | null
+          created_at: string
+          id: string
+          message: string
+          request_type: Database["public"]["Enums"]["request_type"]
+          requester_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["request_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          council_response?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          request_type: Database["public"]["Enums"]["request_type"]
+          requester_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          council_response?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          request_type?: Database["public"]["Enums"]["request_type"]
+          requester_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["request_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      council_votes: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          opinion_id: string
+          vote: Database["public"]["Enums"]["vote_choice"]
+          voter_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          opinion_id: string
+          vote: Database["public"]["Enums"]["vote_choice"]
+          voter_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          opinion_id?: string
+          vote?: Database["public"]["Enums"]["vote_choice"]
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "council_votes_opinion_id_fkey"
+            columns: ["opinion_id"]
+            isOneToOne: false
+            referencedRelation: "council_opinions"
             referencedColumns: ["id"]
           },
         ]
@@ -348,6 +458,45 @@ export type Database = {
           },
         ]
       }
+      knowledge_suggestions: {
+        Row: {
+          created_at: string
+          dismissed_by: string | null
+          id: string
+          is_dismissed: boolean
+          reason: string
+          source_id: string
+          source_type: string
+          suggestion_type: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_by?: string | null
+          id?: string
+          is_dismissed?: boolean
+          reason: string
+          source_id: string
+          source_type: string
+          suggestion_type: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_by?: string | null
+          id?: string
+          is_dismissed?: boolean
+          reason?: string
+          source_id?: string
+          source_type?: string
+          suggestion_type?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
       living_rules: {
         Row: {
           council_comments: string | null
@@ -563,6 +712,63 @@ export type Database = {
           },
         ]
       }
+      system_state: {
+        Row: {
+          alert_message: string | null
+          alert_state: Database["public"]["Enums"]["alert_state"]
+          changed_at: string
+          changed_by: string | null
+          id: string
+        }
+        Insert: {
+          alert_message?: string | null
+          alert_state?: Database["public"]["Enums"]["alert_state"]
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+        }
+        Update: {
+          alert_message?: string | null
+          alert_state?: Database["public"]["Enums"]["alert_state"]
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      temporary_access: {
+        Row: {
+          created_at: string
+          expires_at: string
+          granted_by: string
+          id: string
+          reason: string | null
+          resource_id: string | null
+          resource_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          granted_by: string
+          id?: string
+          reason?: string | null
+          resource_id?: string | null
+          resource_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          granted_by?: string
+          id?: string
+          reason?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -600,6 +806,20 @@ export type Database = {
       is_guardian_supreme: { Args: never; Returns: boolean }
     }
     Enums: {
+      action_type:
+        | "file_created"
+        | "file_updated"
+        | "file_deleted"
+        | "judgment_issued"
+        | "status_changed"
+        | "vote_cast"
+        | "request_submitted"
+        | "request_resolved"
+        | "opinion_created"
+        | "event_created"
+        | "rule_created"
+        | "alert_changed"
+      alert_state: "normal" | "vigilance" | "crise"
       app_role: "guardian_supreme" | "initiate" | "archonte"
       file_type: "internal" | "external"
       initiate_grade:
@@ -634,6 +854,15 @@ export type Database = {
         | "influence"
         | "observation"
         | "unknown"
+      request_status: "pending" | "approved" | "rejected" | "adjourned"
+      request_type:
+        | "entry"
+        | "exit"
+        | "pardon"
+        | "access"
+        | "promotion"
+        | "other"
+      vote_choice: "pour" | "contre" | "abstention"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -761,6 +990,21 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_type: [
+        "file_created",
+        "file_updated",
+        "file_deleted",
+        "judgment_issued",
+        "status_changed",
+        "vote_cast",
+        "request_submitted",
+        "request_resolved",
+        "opinion_created",
+        "event_created",
+        "rule_created",
+        "alert_changed",
+      ],
+      alert_state: ["normal", "vigilance", "crise"],
       app_role: ["guardian_supreme", "initiate", "archonte"],
       file_type: ["internal", "external"],
       initiate_grade: [
@@ -800,6 +1044,9 @@ export const Constants = {
         "observation",
         "unknown",
       ],
+      request_status: ["pending", "approved", "rejected", "adjourned"],
+      request_type: ["entry", "exit", "pardon", "access", "promotion", "other"],
+      vote_choice: ["pour", "contre", "abstention"],
     },
   },
 } as const
