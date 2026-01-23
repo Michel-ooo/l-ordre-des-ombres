@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail } from 'lucide-react';
+import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
@@ -77,6 +77,19 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Link>
                 );
               })}
+
+              {/* Knowledge link - for Archontes and Guardian */}
+              {isGuardianSupreme && (
+                <Link
+                  to="/knowledge"
+                  className={`nav-link flex items-center gap-2 text-purple-400 ${location.pathname === '/knowledge' ? 'active' : ''}`}
+                >
+                  <Brain className="w-4 h-4" />
+                  <span className="hidden md:inline text-sm font-heading tracking-wide">
+                    Savoir
+                  </span>
+                </Link>
+              )}
 
               {/* Guardian link */}
               {isGuardianSupreme && (

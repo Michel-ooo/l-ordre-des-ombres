@@ -15,6 +15,7 @@ import GuardianDashboard from "./pages/GuardianDashboard";
 import ReportMemberPage from "./pages/ReportMemberPage";
 import ExitRequestPage from "./pages/ExitRequestPage";
 import MessagesPage from "./pages/MessagesPage";
+import KnowledgePage from "./pages/KnowledgePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,9 @@ const App = () => (
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ReportMemberPage /></ProtectedRoute>} />
             <Route path="/exit-request" element={<ProtectedRoute><ExitRequestPage /></ProtectedRoute>} />
+            
+            {/* Knowledge module - Archontes & Guardian */}
+            <Route path="/knowledge" element={<ProtectedRoute><KnowledgePage /></ProtectedRoute>} />
             
             {/* Guardian Supreme only */}
             <Route path="/guardian" element={<ProtectedRoute requireGuardian><GuardianDashboard /></ProtectedRoute>} />
