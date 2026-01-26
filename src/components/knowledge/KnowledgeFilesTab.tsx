@@ -31,6 +31,15 @@ interface KnowledgeFile {
   updated_at: string;
 }
 
+interface FileFormData {
+  name: string;
+  alias: string;
+  file_type: FileType;
+  narrative_status: NarrativeStatus;
+  description: string;
+  council_notes: string;
+}
+
 const statusColors: Record<NarrativeStatus, string> = {
   neutral: 'bg-muted text-muted-foreground',
   observed: 'bg-yellow-500/20 text-yellow-300',
@@ -49,6 +58,98 @@ const statusLabels: Record<NarrativeStatus, string> = {
   unknown: 'Inconnu',
 };
 
+// Extracted as a separate component to prevent re-creation on every render
+const FileForm = ({ 
+  formData, 
+  setFormData, 
+  onSubmit, 
+  submitLabel 
+}: { 
+  formData: FileFormData;
+  setFormData: React.Dispatch<React.SetStateAction<FileFormData>>;
+  onSubmit: () => void; 
+  submitLabel: string;
+}) => (
+  <div className="space-y-4">
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Nom</Label>
+        <Input
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          placeholder="Nom de la fiche"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label>Alias symbolique</Label>
+        <Input
+          value={formData.alias}
+          onChange={(e) => setFormData(prev => ({ ...prev, alias: e.target.value }))}
+          placeholder="Alias (optionnel)"
+        />
+      </div>
+    </div>
+    
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label>Type</Label>
+        <Select
+          value={formData.file_type}
+          onValueChange={(value: FileType) => setFormData(prev => ({ ...prev, file_type: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="internal">Interne (membre)</SelectItem>
+            <SelectItem value="external">Externe</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label>Statut narratif</Label>
+        <Select
+          value={formData.narrative_status}
+          onValueChange={(value: NarrativeStatus) => setFormData(prev => ({ ...prev, narrative_status: value }))}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(statusLabels).map(([value, label]) => (
+              <SelectItem key={value} value={value}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Description</Label>
+      <Textarea
+        value={formData.description}
+        onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+        placeholder="Description détaillée..."
+        rows={4}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Notes du Conseil (privées)</Label>
+      <Textarea
+        value={formData.council_notes}
+        onChange={(e) => setFormData(prev => ({ ...prev, council_notes: e.target.value }))}
+        placeholder="Notes confidentielles..."
+        rows={3}
+      />
+    </div>
+
+    <Button onClick={onSubmit} className="w-full" disabled={!formData.name}>
+      {submitLabel}
+    </Button>
+  </div>
+);
+
 export function KnowledgeFilesTab() {
   const { user, isGuardianSupreme } = useAuth();
   const queryClient = useQueryClient();
@@ -58,11 +159,11 @@ export function KnowledgeFilesTab() {
   const [isEditMode, setIsEditMode] = useState(false);
   
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FileFormData>({
     name: '',
     alias: '',
-    file_type: 'external' as FileType,
-    narrative_status: 'neutral' as NarrativeStatus,
+    file_type: 'external',
+    narrative_status: 'neutral',
     description: '',
     council_notes: '',
   });
@@ -168,86 +269,6 @@ export function KnowledgeFilesTab() {
     file.alias?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const FileForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Nom</Label>
-          <Input
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Nom de la fiche"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Alias symbolique</Label>
-          <Input
-            value={formData.alias}
-            onChange={(e) => setFormData(prev => ({ ...prev, alias: e.target.value }))}
-            placeholder="Alias (optionnel)"
-          />
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Type</Label>
-          <Select
-            value={formData.file_type}
-            onValueChange={(value: FileType) => setFormData(prev => ({ ...prev, file_type: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="internal">Interne (membre)</SelectItem>
-              <SelectItem value="external">Externe</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-2">
-          <Label>Statut narratif</Label>
-          <Select
-            value={formData.narrative_status}
-            onValueChange={(value: NarrativeStatus) => setFormData(prev => ({ ...prev, narrative_status: value }))}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(statusLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Description</Label>
-        <Textarea
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="Description détaillée..."
-          rows={4}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label>Notes du Conseil (privées)</Label>
-        <Textarea
-          value={formData.council_notes}
-          onChange={(e) => setFormData(prev => ({ ...prev, council_notes: e.target.value }))}
-          placeholder="Notes confidentielles..."
-          rows={3}
-        />
-      </div>
-
-      <Button onClick={onSubmit} className="w-full" disabled={!formData.name}>
-        {submitLabel}
-      </Button>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -274,6 +295,8 @@ export function KnowledgeFilesTab() {
               <DialogTitle>Créer une fiche de Savoir</DialogTitle>
             </DialogHeader>
             <FileForm
+              formData={formData}
+              setFormData={setFormData}
               onSubmit={() => createMutation.mutate(formData)}
               submitLabel="Créer la fiche"
             />
@@ -371,6 +394,8 @@ export function KnowledgeFilesTab() {
           </DialogHeader>
           {isEditMode ? (
             <FileForm
+              formData={formData}
+              setFormData={setFormData}
               onSubmit={() => updateMutation.mutate({ id: selectedFile!.id, data: formData })}
               submitLabel="Enregistrer les modifications"
             />
