@@ -240,6 +240,47 @@ export type Database = {
         }
         Relationships: []
       }
+      file_annotations: {
+        Row: {
+          annotation_type: string
+          author_id: string
+          content: string
+          created_at: string
+          file_id: string
+          id: string
+          is_private: boolean
+          updated_at: string
+        }
+        Insert: {
+          annotation_type?: string
+          author_id: string
+          content: string
+          created_at?: string
+          file_id: string
+          id?: string
+          is_private?: boolean
+          updated_at?: string
+        }
+        Update: {
+          annotation_type?: string
+          author_id?: string
+          content?: string
+          created_at?: string
+          file_id?: string
+          id?: string
+          is_private?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_annotations_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_events: {
         Row: {
           created_at: string
@@ -320,6 +361,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      file_tag_assignments: {
+        Row: {
+          created_at: string
+          file_id: string
+          id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_id: string
+          id?: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          file_id?: string
+          id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_tag_assignments_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "file_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "file_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      file_tags: {
+        Row: {
+          color: string
+          created_at: string
+          created_by: string
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          created_by: string
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          created_by?: string
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       initiation_requests: {
         Row: {
@@ -417,9 +521,13 @@ export type Database = {
           description: string | null
           file_type: Database["public"]["Enums"]["file_type"]
           id: string
+          is_sealed: boolean
           name: string
           narrative_status: Database["public"]["Enums"]["narrative_status"]
           profile_id: string | null
+          sealed_by: string | null
+          sealed_reason: string | null
+          unseal_condition: string | null
           updated_at: string
         }
         Insert: {
@@ -430,9 +538,13 @@ export type Database = {
           description?: string | null
           file_type?: Database["public"]["Enums"]["file_type"]
           id?: string
+          is_sealed?: boolean
           name: string
           narrative_status?: Database["public"]["Enums"]["narrative_status"]
           profile_id?: string | null
+          sealed_by?: string | null
+          sealed_reason?: string | null
+          unseal_condition?: string | null
           updated_at?: string
         }
         Update: {
@@ -443,9 +555,13 @@ export type Database = {
           description?: string | null
           file_type?: Database["public"]["Enums"]["file_type"]
           id?: string
+          is_sealed?: boolean
           name?: string
           narrative_status?: Database["public"]["Enums"]["narrative_status"]
           profile_id?: string | null
+          sealed_by?: string | null
+          sealed_reason?: string | null
+          unseal_condition?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -496,6 +612,59 @@ export type Database = {
           target_type?: string
         }
         Relationships: []
+      }
+      knowledge_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          file_id: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          file_id?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          file_id?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_tasks_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       living_rules: {
         Row: {
@@ -612,6 +781,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      personal_journal: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          mood: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          mood?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
