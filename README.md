@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# L'ORDRE DES OMBRES
 
-## Project info
+## Entrée dans l'ordre
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Si vous lisez ceci, c’est que l’accès n’a pas été bloqué.  
+L’Ordre n’est pas public. Il est simplement accessible.
 
-## How can I edit this code?
+Vous pouvez créer un compte.  
+Ce que vous en ferez ne regarde que vous.
 
-There are several ways of editing your application.
+> Mot de passe initial : `123456`  
+> Il est connu. Il est volontairement faible.  
+> Demandez à le changer.
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Accès
 
-Changes made via Lovable will be committed automatically to this repo.
+1. [Ouvrez](https://l-ordre-des-ombres.lovable.dev) le site de l'ordre
+2. Inscription libre  
+3. Connexion immédiate  
 
-**Use your preferred IDE**
+Aucune validation.  
+Aucune confirmation par mail.  
+Personne ne vous demandera pourquoi vous êtes là.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Certaines choses sont visibles.  
+D’autres apparaissent avec le temps.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- Rien n’est expliqué deux fois  
+- Tout est enregistré  
+- Ce qui est fait ne disparaît pas  
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+L’Ordre n’intervient pas.  
+Il observe.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Sécurité
 
-**Edit a file directly in GitHub**
+Le mot de passe par défaut existe pour une raison.  
+Le garder est un choix.  
+En assumer les conséquences aussi.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Dernier avertissement
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Vous pouvez fermer cet onglet maintenant.  
+Ou continuer.
 
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+L’Ordre ne force personne.
