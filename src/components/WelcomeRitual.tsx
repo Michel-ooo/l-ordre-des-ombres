@@ -19,13 +19,21 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
 
   return (
     <div 
-      className="fixed inset-0 bg-background flex items-center justify-center z-50 overflow-hidden"
+      className="fixed inset-0 bg-background flex items-center justify-center z-50 overflow-hidden cursor-pointer"
       onClick={handleContinue}
     >
-      {/* Background glow effect */}
+      {/* Background radial glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[600px] h-[600px] rounded-full bg-gradient-radial from-white/5 via-transparent to-transparent animate-pulse-slow" />
+        <div 
+          className="w-[800px] h-[800px] rounded-full animate-pulse-slow"
+          style={{ background: 'radial-gradient(circle, hsl(42 70% 50% / 0.04) 0%, transparent 70%)' }}
+        />
       </div>
+
+      {/* Subtle vignette */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse at center, transparent 40%, hsl(30 10% 2%) 100%)',
+      }} />
 
       <AnimatePresence mode="wait">
         {stage === 0 && (
@@ -34,22 +42,22 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="text-center px-8"
+            transition={{ duration: 1.2 }}
+            className="text-center px-8 relative z-10"
           >
             <motion.img
               src={logo}
               alt="L'Ordre"
-              className="w-48 h-48 mx-auto mb-8 lunar-glow-strong animate-float"
-              initial={{ scale: 0.8, opacity: 0 }}
+              className="w-52 h-52 mx-auto mb-10 lunar-glow-strong animate-float"
+              initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              transition={{ duration: 2, ease: "easeOut" }}
             />
             <motion.p
-              className="text-muted-foreground text-lg tracking-widest font-heading"
+              className="text-gold-dim text-base tracking-[0.4em] font-heading-text"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
             >
               CLIQUEZ POUR CONTINUER
             </motion.p>
@@ -63,26 +71,33 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center px-8 max-w-2xl"
+            className="text-center px-8 max-w-2xl relative z-10"
           >
             <motion.div
-              className="text-6xl mb-8"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 100 }}
+              className="text-6xl mb-8 text-gold-dim"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 80, damping: 12 }}
             >
-              ⚠
+              ⚜
             </motion.div>
             <motion.h2
-              className="font-heading text-2xl md:text-3xl mb-6 tracking-wide text-glow"
+              className="font-heading text-2xl md:text-3xl mb-6 tracking-[0.15em] text-glow text-gold"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
               AVERTISSEMENT
             </motion.h2>
+            <motion.div className="gothic-divider max-w-xs mx-auto mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <span className="text-gold-dim/50 text-xs">◆</span>
+            </motion.div>
             <motion.p
-              className="text-muted-foreground leading-relaxed mb-8"
+              className="text-muted-foreground leading-relaxed mb-8 font-body text-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
@@ -93,7 +108,7 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
               Les secrets révélés ici sont protégés par des serments anciens.
             </motion.p>
             <motion.p
-              className="text-muted-foreground/60 text-sm tracking-widest"
+              className="text-gold-dim/50 text-sm tracking-[0.3em] font-heading-text"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
@@ -110,18 +125,18 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center px-8 max-w-2xl"
+            className="text-center px-8 max-w-2xl relative z-10"
           >
             <motion.div
-              className="text-4xl mb-8 tracking-[1em] ml-4"
+              className="text-3xl mb-10 tracking-[1em] ml-4 text-gold-dim/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              ☽ ◈ ⬡
+              ☽ ⚜ ☽
             </motion.div>
             <motion.blockquote
-              className="font-heading text-xl md:text-2xl italic text-foreground/90 mb-8 leading-relaxed"
+              className="font-heading-text text-xl md:text-2xl italic text-gold/80 mb-10 leading-relaxed"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
@@ -133,15 +148,22 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
               Sous la lune nous jurons."
             </motion.blockquote>
             <motion.div
-              className="flex flex-col items-center gap-4"
+              className="flex flex-col items-center gap-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
             >
-              <p className="text-muted-foreground text-sm">— Devise de l'Ordre —</p>
+              <p className="text-muted-foreground text-sm font-body italic">— Devise de l'Ordre —</p>
               <motion.button
-                className="mt-4 px-8 py-3 border border-foreground/30 rounded-sm font-heading tracking-widest text-sm hover:bg-foreground/5 hover:border-foreground/50 transition-all duration-300 lunar-glow"
-                whileHover={{ scale: 1.02 }}
+                className="mt-4 px-10 py-4 font-heading-text tracking-[0.2em] text-sm text-gold transition-all duration-500 lunar-glow"
+                style={{
+                  border: '1px solid hsl(42 70% 50% / 0.4)',
+                  background: 'linear-gradient(180deg, hsl(42 70% 50% / 0.08) 0%, transparent 100%)',
+                }}
+                whileHover={{ 
+                  scale: 1.03,
+                  boxShadow: '0 0 40px hsl(42 70% 50% / 0.2)',
+                }}
                 whileTap={{ scale: 0.98 }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -155,11 +177,23 @@ export function WelcomeRitual({ onEnter }: WelcomeRitualProps) {
         )}
       </AnimatePresence>
 
-      {/* Decorative corners */}
-      <div className="absolute top-8 left-8 w-16 h-16 border-l border-t border-foreground/10" />
-      <div className="absolute top-8 right-8 w-16 h-16 border-r border-t border-foreground/10" />
-      <div className="absolute bottom-8 left-8 w-16 h-16 border-l border-b border-foreground/10" />
-      <div className="absolute bottom-8 right-8 w-16 h-16 border-r border-b border-foreground/10" />
+      {/* Decorative gothic corners */}
+      <div className="absolute top-8 left-8 w-20 h-20 pointer-events-none" style={{
+        borderLeft: '1px solid hsl(42 70% 50% / 0.15)',
+        borderTop: '1px solid hsl(42 70% 50% / 0.15)',
+      }} />
+      <div className="absolute top-8 right-8 w-20 h-20 pointer-events-none" style={{
+        borderRight: '1px solid hsl(42 70% 50% / 0.15)',
+        borderTop: '1px solid hsl(42 70% 50% / 0.15)',
+      }} />
+      <div className="absolute bottom-8 left-8 w-20 h-20 pointer-events-none" style={{
+        borderLeft: '1px solid hsl(42 70% 50% / 0.15)',
+        borderBottom: '1px solid hsl(42 70% 50% / 0.15)',
+      }} />
+      <div className="absolute bottom-8 right-8 w-20 h-20 pointer-events-none" style={{
+        borderRight: '1px solid hsl(42 70% 50% / 0.15)',
+        borderBottom: '1px solid hsl(42 70% 50% / 0.15)',
+      }} />
     </div>
   );
 }

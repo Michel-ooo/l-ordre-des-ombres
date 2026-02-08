@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Raleway:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,71 +6,77 @@
 
 @layer base {
   :root {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
+    --background: 30 10% 3%;
+    --foreground: 40 20% 90%;
 
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 95%;
+    --card: 30 8% 6%;
+    --card-foreground: 40 20% 90%;
 
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 30 8% 6%;
+    --popover-foreground: 40 20% 90%;
 
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 4%;
+    --primary: 42 70% 50%;
+    --primary-foreground: 30 10% 3%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 30 8% 10%;
+    --secondary-foreground: 40 20% 85%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 30 6% 14%;
+    --muted-foreground: 40 10% 50%;
 
-    --accent: 45 30% 50%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 42 60% 42%;
+    --accent-foreground: 30 10% 3%;
 
-    --destructive: 0 62% 30%;
+    --destructive: 0 50% 35%;
     --destructive-foreground: 0 0% 95%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 100%;
+    --border: 42 20% 15%;
+    --input: 30 8% 12%;
+    --ring: 42 70% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
 
-    /* Custom tokens */
-    --glow: 0 0% 100%;
-    --lunar: 45 10% 90%;
-    --shadow-deep: 0 0% 2%;
-    --mystic-gold: 45 50% 55%;
-    --blood-dark: 0 40% 20%;
-    
-    /* Extended mystical palette */
-    --mystic-purple: 270 50% 40%;
-    --ethereal-blue: 220 70% 50%;
-    --shadow-violet: 280 30% 25%;
-    --arcane-teal: 180 40% 35%;
-    --ritual-amber: 35 80% 45%;
+    /* Gothic luxury tokens */
+    --gold: 42 70% 50%;
+    --gold-dim: 42 40% 30%;
+    --gold-bright: 42 80% 65%;
+    --gold-glow: 42 100% 70%;
+    --crimson: 0 60% 30%;
+    --crimson-bright: 0 70% 45%;
+    --obsidian: 30 10% 3%;
+    --onyx: 30 8% 6%;
+    --cathedral: 30 6% 8%;
+    --ivory: 40 20% 90%;
+    --parchment: 40 30% 80%;
+    --mystic-purple: 270 40% 35%;
+    --ethereal-blue: 220 50% 40%;
+    --shadow-violet: 280 25% 20%;
+    --arcane-teal: 180 30% 30%;
+    --ritual-amber: 35 70% 45%;
+    --shadow-deep: 30 10% 2%;
+    --mystic-gold: 42 60% 50%;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 45 30% 50%;
-    --accent-foreground: 0 0% 4%;
-    --destructive: 0 62% 30%;
+    --background: 30 10% 3%;
+    --foreground: 40 20% 90%;
+    --card: 30 8% 6%;
+    --card-foreground: 40 20% 90%;
+    --popover: 30 8% 6%;
+    --popover-foreground: 40 20% 90%;
+    --primary: 42 70% 50%;
+    --primary-foreground: 30 10% 3%;
+    --secondary: 30 8% 10%;
+    --secondary-foreground: 40 20% 85%;
+    --muted: 30 6% 14%;
+    --muted-foreground: 40 10% 50%;
+    --accent: 42 60% 42%;
+    --accent-foreground: 30 10% 3%;
+    --destructive: 0 50% 35%;
     --destructive-foreground: 0 0% 95%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 100%;
+    --border: 42 20% 15%;
+    --input: 30 8% 12%;
+    --ring: 42 70% 50%;
   }
 }
 
@@ -81,6 +87,9 @@
 
   body {
     @apply bg-background text-foreground font-body antialiased;
+    background-image: 
+      radial-gradient(ellipse at 50% 0%, hsl(42 70% 50% / 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, hsl(0 60% 30% / 0.02) 0%, transparent 40%);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -89,29 +98,102 @@
 }
 
 @layer components {
+  /* Golden glow effects */
   .lunar-glow {
     box-shadow: 
-      0 0 20px hsl(var(--glow) / 0.1),
-      0 0 40px hsl(var(--glow) / 0.05),
-      0 0 60px hsl(var(--glow) / 0.025);
+      0 0 20px hsl(var(--gold) / 0.15),
+      0 0 40px hsl(var(--gold) / 0.08),
+      0 0 60px hsl(var(--gold) / 0.03);
   }
 
   .lunar-glow-strong {
     box-shadow: 
-      0 0 30px hsl(var(--glow) / 0.2),
-      0 0 60px hsl(var(--glow) / 0.1),
-      0 0 100px hsl(var(--glow) / 0.05);
+      0 0 30px hsl(var(--gold) / 0.25),
+      0 0 60px hsl(var(--gold) / 0.15),
+      0 0 100px hsl(var(--gold) / 0.08);
   }
 
   .text-glow {
     text-shadow: 
-      0 0 10px hsl(var(--glow) / 0.5),
-      0 0 20px hsl(var(--glow) / 0.3),
-      0 0 30px hsl(var(--glow) / 0.1);
+      0 0 10px hsl(var(--gold) / 0.4),
+      0 0 30px hsl(var(--gold) / 0.2),
+      0 0 50px hsl(var(--gold) / 0.1);
+  }
+
+  .text-glow-crimson {
+    text-shadow: 
+      0 0 10px hsl(var(--crimson) / 0.5),
+      0 0 20px hsl(var(--crimson) / 0.3);
+  }
+
+  /* Gothic border ornament */
+  .gothic-border {
+    @apply relative;
+    border: 1px solid hsl(var(--gold-dim));
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--obsidian)) 100%
+    );
+  }
+
+  .gothic-border::before,
+  .gothic-border::after {
+    content: '◆';
+    @apply absolute text-xs;
+    color: hsl(var(--gold-dim));
+  }
+
+  .gothic-border::before {
+    @apply -top-2 left-1/2 -translate-x-1/2;
+  }
+
+  .gothic-border::after {
+    @apply -bottom-2 left-1/2 -translate-x-1/2;
+  }
+
+  /* Ornate card */
+  .ritual-card {
+    @apply relative overflow-hidden;
+    border-radius: var(--radius);
+    background: linear-gradient(
+      180deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--obsidian)) 100%
+    );
+    border: 1px solid hsl(var(--gold-dim) / 0.4);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ritual-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500;
+    background: radial-gradient(
+      ellipse at top center,
+      hsl(var(--gold) / 0.08) 0%,
+      transparent 70%
+    );
+  }
+
+  .ritual-card:hover {
+    border-color: hsl(var(--gold-dim) / 0.7);
+  }
+
+  .ritual-card:hover::before {
+    @apply opacity-100;
+  }
+
+  /* Corner ornaments for ritual cards */
+  .ritual-card::after {
+    content: '';
+    @apply absolute top-0 left-0 w-6 h-6 pointer-events-none;
+    border-top: 1px solid hsl(var(--gold-dim) / 0.5);
+    border-left: 1px solid hsl(var(--gold-dim) / 0.5);
   }
 
   .mystic-border {
-    @apply border border-border/50;
+    @apply border;
+    border-color: hsl(var(--gold-dim) / 0.3);
     background: linear-gradient(
       135deg,
       hsl(var(--card)) 0%,
@@ -119,43 +201,35 @@
     );
   }
 
-  .ritual-card {
-    @apply relative overflow-hidden rounded-lg;
-    background: linear-gradient(
-      180deg,
-      hsl(var(--card)) 0%,
-      hsl(0 0% 3%) 100%
-    );
-    border: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .ritual-card::before {
-    content: '';
-    @apply absolute inset-0 opacity-20 pointer-events-none;
-    background: radial-gradient(
-      ellipse at top center,
-      hsl(var(--glow) / 0.1) 0%,
-      transparent 70%
-    );
-  }
-
   .cipher-input {
-    @apply bg-secondary/50 border-border/50 text-foreground placeholder:text-muted-foreground;
-    @apply focus:ring-1 focus:ring-primary/30 focus:border-primary/50;
+    @apply bg-secondary/50 border text-foreground placeholder:text-muted-foreground;
+    border-color: hsl(var(--gold-dim) / 0.3);
+    @apply focus:ring-1;
+    --tw-ring-color: hsl(var(--gold) / 0.3);
   }
 
+  .cipher-input:focus {
+    border-color: hsl(var(--gold) / 0.5);
+  }
+
+  /* Gothic navigation */
   .nav-link {
-    @apply relative px-4 py-2 text-muted-foreground transition-all duration-300;
-    @apply hover:text-foreground;
+    @apply relative px-4 py-2 transition-all duration-300;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .nav-link:hover {
+    color: hsl(var(--gold-bright));
   }
 
   .nav-link.active {
-    @apply text-foreground;
+    color: hsl(var(--gold));
   }
 
   .nav-link::after {
     content: '';
-    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-primary;
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold)), transparent);
     @apply transition-all duration-300;
   }
 
@@ -165,27 +239,36 @@
   }
 
   .doctrine-section {
-    @apply relative pl-6 border-l border-border/30;
+    @apply relative pl-6;
+    border-left: 1px solid hsl(var(--gold-dim) / 0.3);
   }
 
   .doctrine-section::before {
     content: '◆';
-    @apply absolute -left-2 top-0 text-xs text-muted-foreground;
+    @apply absolute -left-2 top-0 text-xs;
+    color: hsl(var(--gold-dim));
   }
 
   .archive-item {
-    @apply p-4 rounded-lg transition-all duration-300;
-    @apply bg-secondary/30 hover:bg-secondary/50;
-    @apply border border-transparent hover:border-border/50;
+    @apply p-4 transition-all duration-300;
+    border-radius: var(--radius);
+    background: hsl(var(--secondary) / 0.3);
+    border: 1px solid transparent;
+  }
+
+  .archive-item:hover {
+    background: hsl(var(--secondary) / 0.5);
+    border-color: hsl(var(--gold-dim) / 0.3);
   }
 
   .symbol-glyph {
-    @apply inline-flex items-center justify-center w-8 h-8 rounded-full;
-    @apply bg-secondary text-foreground text-sm;
-    @apply border border-border/50;
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-full text-sm;
+    background: hsl(var(--secondary));
+    color: hsl(var(--gold));
+    border: 1px solid hsl(var(--gold-dim) / 0.4);
   }
 
-  /* Mystic effects for knowledge module */
+  /* Mystic panels */
   .mystic-panel {
     @apply relative;
     background: linear-gradient(
@@ -200,7 +283,7 @@
     @apply absolute inset-0 opacity-10 pointer-events-none;
     background: radial-gradient(
       ellipse at 50% 0%,
-      hsl(var(--mystic-purple) / 0.3) 0%,
+      hsl(var(--gold) / 0.2) 0%,
       transparent 60%
     );
   }
@@ -209,9 +292,9 @@
     @apply relative overflow-hidden;
     background: linear-gradient(
       135deg,
-      hsl(var(--shadow-violet)) 0%,
+      hsl(var(--crimson) / 0.15) 0%,
       hsl(var(--card)) 50%,
-      hsl(var(--shadow-violet)) 100%
+      hsl(var(--crimson) / 0.15) 100%
     );
   }
 
@@ -227,7 +310,7 @@
   .notification-pulse::after {
     content: '';
     @apply absolute -top-1 -right-1 w-3 h-3 rounded-full;
-    background: hsl(var(--destructive));
+    background: hsl(var(--crimson-bright));
     animation: pulse 2s infinite;
   }
 
@@ -237,8 +320,8 @@
 
   .stat-card-glow:hover {
     box-shadow: 
-      0 0 20px hsl(var(--primary) / 0.1),
-      0 0 40px hsl(var(--primary) / 0.05);
+      0 0 20px hsl(var(--gold) / 0.1),
+      0 0 40px hsl(var(--gold) / 0.05);
   }
 
   .timeline-glow {
@@ -250,10 +333,22 @@
     @apply absolute left-0 top-0 w-full h-full;
     background: linear-gradient(
       90deg,
-      hsl(var(--primary) / 0.1) 0%,
+      hsl(var(--gold) / 0.08) 0%,
       transparent 20%
     );
     pointer-events: none;
+  }
+
+  /* Gothic divider */
+  .gothic-divider {
+    @apply flex items-center gap-4 my-8;
+  }
+
+  .gothic-divider::before,
+  .gothic-divider::after {
+    content: '';
+    @apply flex-1 h-px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold-dim) / 0.4), transparent);
   }
 }
 

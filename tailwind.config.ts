@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Cinzel', 'serif'],
-        body: ['Raleway', 'sans-serif'],
+        heading: ['Cinzel Decorative', 'Cinzel', 'serif'],
+        'heading-text': ['Cinzel', 'serif'],
+        body: ['Cormorant Garamond', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,10 +52,19 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        glow: "hsl(var(--glow))",
-        lunar: "hsl(var(--lunar))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          dim: "hsl(var(--gold-dim))",
+          bright: "hsl(var(--gold-bright))",
+          glow: "hsl(var(--gold-glow))",
+        },
+        crimson: {
+          DEFAULT: "hsl(var(--crimson))",
+          bright: "hsl(var(--crimson-bright))",
+        },
         mystic: {
           gold: "hsl(var(--mystic-gold))",
+          purple: "hsl(var(--mystic-purple))",
         },
       },
       borderRadius: {

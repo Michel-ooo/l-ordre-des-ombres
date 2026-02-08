@@ -39,7 +39,10 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50">
+      <header className="fixed top-0 left-0 right-0 z-40 border-b border-gold-dim/20" style={{
+        background: 'linear-gradient(180deg, hsl(30 10% 3% / 0.95) 0%, hsl(30 10% 3% / 0.85) 100%)',
+        backdropFilter: 'blur(16px)',
+      }}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -47,9 +50,9 @@ export function MainLayout({ children }: MainLayoutProps) {
               <img 
                 src={logo} 
                 alt="L'Ordre" 
-                className="w-10 h-10 transition-all duration-300 group-hover:lunar-glow"
+                className="w-10 h-10 transition-all duration-500 group-hover:lunar-glow"
               />
-              <span className="font-heading text-lg tracking-widest hidden sm:block">
+              <span className="font-heading text-sm tracking-[0.2em] hidden sm:block text-gold-dim group-hover:text-gold transition-colors duration-300">
                 L'ORDRE
               </span>
             </Link>
@@ -66,11 +69,11 @@ export function MainLayout({ children }: MainLayoutProps) {
                     className={`nav-link flex items-center gap-2 relative ${isActive ? 'active' : ''}`}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="hidden md:inline text-sm font-heading tracking-wide">
+                    <span className="hidden md:inline text-sm font-heading-text tracking-wider">
                       {item.label}
                     </span>
                     {isMessages && unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                      <span className="absolute -top-1 -right-1 bg-crimson-bright text-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
@@ -78,14 +81,15 @@ export function MainLayout({ children }: MainLayoutProps) {
                 );
               })}
 
-              {/* Knowledge link - for Archontes and Guardian */}
+              {/* Knowledge link */}
               {isGuardianSupreme && (
                 <Link
                   to="/knowledge"
-                  className={`nav-link flex items-center gap-2 text-purple-400 ${location.pathname === '/knowledge' ? 'active' : ''}`}
+                  className={`nav-link flex items-center gap-2 ${location.pathname === '/knowledge' ? 'active' : ''}`}
+                  style={{ color: location.pathname === '/knowledge' ? 'hsl(var(--mystic-purple))' : undefined }}
                 >
                   <Brain className="w-4 h-4" />
-                  <span className="hidden md:inline text-sm font-heading tracking-wide">
+                  <span className="hidden md:inline text-sm font-heading-text tracking-wider">
                     Savoir
                   </span>
                 </Link>
@@ -95,10 +99,10 @@ export function MainLayout({ children }: MainLayoutProps) {
               {isGuardianSupreme && (
                 <Link
                   to="/guardian"
-                  className={`nav-link flex items-center gap-2 text-mystic-gold ${location.pathname === '/guardian' ? 'active' : ''}`}
+                  className={`nav-link flex items-center gap-2 ${location.pathname === '/guardian' ? 'active' : ''}`}
                 >
                   <Shield className="w-4 h-4" />
-                  <span className="hidden md:inline text-sm font-heading tracking-wide">
+                  <span className="hidden md:inline text-sm font-heading-text tracking-wider">
                     Gardien
                   </span>
                 </Link>
@@ -107,27 +111,27 @@ export function MainLayout({ children }: MainLayoutProps) {
               {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="ml-2 gap-2 text-xs font-heading">
+                  <Button variant="ghost" size="sm" className="ml-2 gap-2 text-xs font-heading-text tracking-wider text-gold-dim hover:text-gold">
                     <span className="hidden sm:inline">{profile?.pseudonym || 'Initié'}</span>
-                    <span className="sm:hidden">☽</span>
+                    <span className="sm:hidden text-gold-dim">◆</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-card border-border">
-                  <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                    {profile?.pseudonym}
-                    <span className="block text-[10px] capitalize">{profile?.grade}</span>
+                <DropdownMenuContent align="end" className="bg-card border-gold-dim/30">
+                  <div className="px-3 py-2 text-xs text-gold-dim">
+                    <span className="font-heading-text tracking-wider">{profile?.pseudonym}</span>
+                    <span className="block text-[10px] capitalize text-muted-foreground mt-0.5">{profile?.grade}</span>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/report')} className="gap-2 cursor-pointer">
-                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                  <DropdownMenuSeparator className="bg-gold-dim/20" />
+                  <DropdownMenuItem onClick={() => navigate('/report')} className="gap-2 cursor-pointer text-muted-foreground hover:text-gold">
+                    <AlertTriangle className="w-4 h-4 text-gold-dim" />
                     Signaler un membre
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/exit-request')} className="gap-2 cursor-pointer text-red-400">
+                  <DropdownMenuItem onClick={() => navigate('/exit-request')} className="gap-2 cursor-pointer text-crimson-bright hover:text-crimson-bright">
                     <DoorOpen className="w-4 h-4" />
                     Quitter l'Ordre
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 cursor-pointer">
+                  <DropdownMenuSeparator className="bg-gold-dim/20" />
+                  <DropdownMenuItem onClick={handleSignOut} className="gap-2 cursor-pointer text-muted-foreground hover:text-foreground">
                     <LogOut className="w-4 h-4" />
                     Déconnexion
                   </DropdownMenuItem>
@@ -136,20 +140,26 @@ export function MainLayout({ children }: MainLayoutProps) {
             </nav>
           </div>
         </div>
+        {/* Gold line accent */}
+        <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, hsl(42 70% 50% / 0.3), transparent)' }} />
       </header>
 
       {/* Main Content */}
-      <main className="pt-24 pb-16 px-4">
+      <main className="pt-24 pb-20 px-4">
         <div className="container mx-auto max-w-4xl">
           {children}
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 py-4 bg-background/80 backdrop-blur-md border-t border-border/30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground/50">
-            <span className="font-heading tracking-widest">☽ L'ORDRE DES OMBRES ☽</span>
+      <footer className="fixed bottom-0 left-0 right-0 z-40 border-t border-gold-dim/10" style={{
+        background: 'linear-gradient(0deg, hsl(30 10% 3% / 0.95) 0%, hsl(30 10% 3% / 0.85) 100%)',
+        backdropFilter: 'blur(16px)',
+      }}>
+        <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, hsl(42 70% 50% / 0.2), transparent)' }} />
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-4 text-xs text-gold-dim/40">
+            <span className="font-heading-text tracking-[0.3em]">☽ L'ORDRE DES OMBRES ☽</span>
           </div>
         </div>
       </footer>
