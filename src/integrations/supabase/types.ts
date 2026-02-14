@@ -707,33 +707,55 @@ export type Database = {
       }
       messages: {
         Row: {
+          attachments: Json | null
           content: string
+          conversation_id: string | null
           created_at: string
+          edited_at: string | null
           id: string
           is_read: boolean
+          message_type: string
+          parent_message_id: string | null
           recipient_id: string
           sender_id: string
           subject: string
         }
         Insert: {
+          attachments?: Json | null
           content: string
+          conversation_id?: string | null
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_read?: boolean
+          message_type?: string
+          parent_message_id?: string | null
           recipient_id: string
           sender_id: string
           subject: string
         }
         Update: {
+          attachments?: Json | null
           content?: string
+          conversation_id?: string | null
           created_at?: string
+          edited_at?: string | null
           id?: string
           is_read?: boolean
+          message_type?: string
+          parent_message_id?: string | null
           recipient_id?: string
           sender_id?: string
           subject?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_recipient_id_fkey"
             columns: ["recipient_id"]
@@ -968,6 +990,139 @@ export type Database = {
           resource_id?: string | null
           resource_type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      tribunal_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          message_type: string
+          sender_id: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          sender_id: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          message_type?: string
+          sender_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tribunal_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tribunal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tribunal_participants: {
+        Row: {
+          admitted_at: string | null
+          id: string
+          invited_at: string
+          notes: string | null
+          role: string
+          session_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admitted_at?: string | null
+          id?: string
+          invited_at?: string
+          notes?: string | null
+          role?: string
+          session_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admitted_at?: string | null
+          id?: string
+          invited_at?: string
+          notes?: string | null
+          role?: string
+          session_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tribunal_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "tribunal_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tribunal_sessions: {
+        Row: {
+          accused_id: string | null
+          created_at: string
+          daily_room_name: string | null
+          daily_room_url: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          presided_by: string
+          scheduled_at: string
+          session_type: string
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          verdict: string | null
+          verdict_details: string | null
+        }
+        Insert: {
+          accused_id?: string | null
+          created_at?: string
+          daily_room_name?: string | null
+          daily_room_url?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          presided_by: string
+          scheduled_at: string
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          verdict?: string | null
+          verdict_details?: string | null
+        }
+        Update: {
+          accused_id?: string | null
+          created_at?: string
+          daily_room_name?: string | null
+          daily_room_url?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          presided_by?: string
+          scheduled_at?: string
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          verdict?: string | null
+          verdict_details?: string | null
         }
         Relationships: []
       }
