@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain } from 'lucide-react';
+import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ const navItems = [
   { path: '/doctrine', label: 'Doctrine', icon: Scroll },
   { path: '/archives', label: 'Archives', icon: Archive },
   { path: '/messages', label: 'Messages', icon: Mail },
+  { path: '/tribunal', label: 'Tribunal', icon: Gavel },
 ];
 
 export function MainLayout({ children }: MainLayoutProps) {

@@ -8,6 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 import { z } from 'zod';
 import logo from '@/assets/logo-ordre.png';
+import { supabase } from '@/integrations/supabase/client';
 
 const loginSchema = z.object({
   email: z.string().email('Identifiant invalide'),
@@ -154,7 +155,29 @@ const AuthPage = () => {
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-border/50">
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={async () => {
+                const email = prompt('Entrez votre adresse email pour recevoir un lien de réinitialisation :');
+                if (email) {
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) {
+                    toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+                  } else {
+                    toast({ title: 'Email envoyé', description: 'Vérifiez votre boîte de réception.' });
+                  }
+                }
+              }}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors underline"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-border/50">
             <p className="text-xs text-muted-foreground text-center">
               Vous souhaitez rejoindre l'Ordre ?
             </p>
