@@ -12,6 +12,7 @@ interface Profile {
   grade: InitiateGrade;
   status: MemberStatus;
   joined_at: string;
+  avatar_url: string | null;
 }
 
 interface AuthContextType {

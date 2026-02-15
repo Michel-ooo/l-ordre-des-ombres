@@ -18,6 +18,7 @@ import MessagesPage from "./pages/MessagesPage";
 import KnowledgePage from "./pages/KnowledgePage";
 import TribunalPage from "./pages/TribunalPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import ProfileSettingsPage from "./pages/ProfileSettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ReportMemberPage /></ProtectedRoute>} />
             <Route path="/exit-request" element={<ProtectedRoute><ExitRequestPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
             
             {/* Tribunal */}
             <Route path="/tribunal" element={<ProtectedRoute><TribunalPage /></ProtectedRoute>} />
