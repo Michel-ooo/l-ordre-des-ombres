@@ -14,7 +14,9 @@ import {
   MoreVertical,
   Trash2,
   Search,
-  User
+  User,
+  Phone,
+  PhoneOff,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EmojiPicker } from "@/components/EmojiPicker";
@@ -25,6 +27,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,6 +96,7 @@ const MessagesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
   const [conversationToDelete, setConversationToDelete] = useState<string | null>(null);
+  const [callActive, setCallActive] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -392,22 +398,33 @@ const MessagesPage = () => {
                       </p>
                     )}
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="w-5 h-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => setConversationToDelete(selectedMember.id)}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Supprimer la conversation
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setCallActive(true)}
+                      className="text-green-500 hover:text-green-400 hover:bg-green-500/10"
+                      title="Appeler"
+                    >
+                      <Phone className="w-5 h-5" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="w-5 h-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => setConversationToDelete(selectedMember.id)}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Supprimer la conversation
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
 
                 {/* Messages */}
@@ -708,6 +725,36 @@ const MessagesPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Call Dialog */}
+      <Dialog open={callActive} onOpenChange={setCallActive}>
+        <DialogContent className="max-w-3xl h-[80vh] p-0 overflow-hidden">
+          <DialogHeader className="p-4 pb-2 flex-row items-center justify-between">
+            <DialogTitle className="flex items-center gap-2">
+              <Phone className="w-5 h-5 text-primary" />
+              Appel avec {selectedMember?.pseudonym}
+            </DialogTitle>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setCallActive(false)}
+              className="gap-2"
+            >
+              <PhoneOff className="w-4 h-4" />
+              Raccrocher
+            </Button>
+          </DialogHeader>
+          {callActive && selectedMember && (
+            <iframe
+              src={`https://meet.jit.si/ordre-call-${[user?.id, selectedMember.id].sort().join('-')}#config.prejoinPageEnabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false`}
+              className="w-full flex-1 border-0"
+              style={{ height: 'calc(80vh - 70px)' }}
+              allow="camera; microphone; fullscreen; display-capture"
+              title={`Appel avec ${selectedMember.pseudonym}`}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 };

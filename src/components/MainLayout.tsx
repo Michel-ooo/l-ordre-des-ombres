@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Settings } from 'lucide-react';
 import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -123,6 +124,10 @@ export function MainLayout({ children }: MainLayoutProps) {
                     <span className="block text-[10px] capitalize text-muted-foreground mt-0.5">{profile?.grade}</span>
                   </div>
                   <DropdownMenuSeparator className="bg-gold-dim/20" />
+                  <DropdownMenuItem onClick={() => navigate('/settings')} className="gap-2 cursor-pointer text-muted-foreground hover:text-gold">
+                    <Settings className="w-4 h-4 text-gold-dim" />
+                    Paramètres
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/report')} className="gap-2 cursor-pointer text-muted-foreground hover:text-gold">
                     <AlertTriangle className="w-4 h-4 text-gold-dim" />
                     Signaler un membre
