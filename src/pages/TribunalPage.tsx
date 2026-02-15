@@ -91,8 +91,9 @@ const TribunalPage = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const myParticipation = participants.find(p => p.user_id === user?.id);
-  const isAdmitted = myParticipation?.status === 'admitted';
-  const isJudge = myParticipation?.role === 'judge';
+  // Guardian Supreme has full access to everything, always considered admitted + judge
+  const isAdmitted = isGuardianSupreme || myParticipation?.status === 'admitted';
+  const isJudge = isGuardianSupreme || myParticipation?.role === 'judge';
 
   useEffect(() => {
     fetchSessions();
