@@ -47,6 +47,69 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_feed: {
+        Row: {
+          activity_type: string
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          metadata: Json | null
+          title: string
+        }
+        Insert: {
+          activity_type?: string
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          metadata?: Json | null
+          title: string
+        }
+        Update: {
+          activity_type?: string
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          metadata?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          name: string
+          rarity: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          name: string
+          rarity?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          name?: string
+          rarity?: string
+        }
+        Relationships: []
+      }
       council_opinions: {
         Row: {
           created_at: string
@@ -424,6 +487,68 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      group_channels: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_private: boolean
+          min_grade: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          min_grade?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_private?: boolean
+          min_grade?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      group_messages: {
+        Row: {
+          channel_id: string
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+        }
+        Insert: {
+          channel_id: string
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+        }
+        Update: {
+          channel_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "group_channels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       initiation_requests: {
         Row: {
@@ -1128,6 +1253,41 @@ export type Database = {
           verdict_details?: string | null
         }
         Relationships: []
+      }
+      user_badges: {
+        Row: {
+          awarded_at: string
+          awarded_by: string
+          badge_id: string
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          awarded_by: string
+          badge_id: string
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          awarded_by?: string
+          badge_id?: string
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

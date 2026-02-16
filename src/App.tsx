@@ -19,6 +19,10 @@ import KnowledgePage from "./pages/KnowledgePage";
 import TribunalPage from "./pages/TribunalPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ProfileSettingsPage from "./pages/ProfileSettingsPage";
+import DashboardPage from "./pages/DashboardPage";
+import LeaderboardPage from "./pages/LeaderboardPage";
+import ActivityFeedPage from "./pages/ActivityFeedPage";
+import ChannelsPage from "./pages/ChannelsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,14 +41,18 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             
             {/* Protected routes */}
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/sanctuaire" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/cipher" element={<ProtectedRoute><CipherPage /></ProtectedRoute>} />
             <Route path="/doctrine" element={<ProtectedRoute><DoctrinePage /></ProtectedRoute>} />
             <Route path="/archives" element={<ProtectedRoute><ArchivesPage /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+            <Route path="/channels" element={<ProtectedRoute><ChannelsPage /></ProtectedRoute>} />
             <Route path="/report" element={<ProtectedRoute><ReportMemberPage /></ProtectedRoute>} />
             <Route path="/exit-request" element={<ProtectedRoute><ExitRequestPage /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><ProfileSettingsPage /></ProtectedRoute>} />
+            <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+            <Route path="/feed" element={<ProtectedRoute><ActivityFeedPage /></ProtectedRoute>} />
             
             {/* Tribunal */}
             <Route path="/tribunal" element={<ProtectedRoute><TribunalPage /></ProtectedRoute>} />
