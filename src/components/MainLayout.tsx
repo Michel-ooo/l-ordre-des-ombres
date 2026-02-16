@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
-import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel } from 'lucide-react';
+import { Settings, BarChart3, Newspaper, Hash } from 'lucide-react';
+import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel, Trophy } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
@@ -19,11 +19,12 @@ interface MainLayoutProps {
 }
 
 const navItems = [
-  { path: '/', label: 'Sanctuaire', icon: Home },
-  { path: '/cipher', label: 'Chiffrement', icon: Lock },
-  { path: '/doctrine', label: 'Doctrine', icon: Scroll },
-  { path: '/archives', label: 'Archives', icon: Archive },
+  { path: '/', label: 'Tableau', icon: BarChart3 },
+  { path: '/feed', label: 'Actualités', icon: Newspaper },
+  { path: '/channels', label: 'Canaux', icon: Hash },
   { path: '/messages', label: 'Messages', icon: Mail },
+  { path: '/cipher', label: 'Chiffrement', icon: Lock },
+  { path: '/leaderboard', label: 'Classement', icon: Trophy },
   { path: '/tribunal', label: 'Tribunal', icon: Gavel },
 ];
 
