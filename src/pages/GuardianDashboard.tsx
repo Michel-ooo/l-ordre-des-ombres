@@ -22,6 +22,8 @@ import {
   Search,
   Edit,
   Plus,
+  Medal,
+  Award,
 } from 'lucide-react';
 import {
   Dialog,
@@ -65,6 +67,24 @@ type ExitRequest = {
   profiles?: { pseudonym: string } | null;
 };
 
+type BadgeItem = {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  rarity: string;
+};
+
+type UserBadge = {
+  id: string;
+  user_id: string;
+  badge_id: string;
+  awarded_at: string;
+  reason: string | null;
+  badges?: BadgeItem | null;
+  profiles?: { pseudonym: string } | null;
+};
 type Report = {
   id: string;
   reporter_id: string;
@@ -137,15 +157,25 @@ const GuardianDashboard = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editPassword, setEditPassword] = useState('');
 
+  // Badge states
+  const [badges, setBadges] = useState<BadgeItem[]>([]);
+  const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
+  const [awardBadgeOpen, setAwardBadgeOpen] = useState(false);
+  const [selectedBadgeId, setSelectedBadgeId] = useState('');
+  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const [badgeReason, setBadgeReason] = useState('');
+
   // Fetch all data
   const fetchData = async () => {
     setLoading(true);
 
-    const [requestsRes, profilesRes, exitRes, reportsRes] = await Promise.all([
+    const [requestsRes, profilesRes, exitRes, reportsRes, badgesRes, userBadgesRes] = await Promise.all([
       supabase.from('initiation_requests').select('*').order('created_at', { ascending: false }),
       supabase.from('profiles').select('*').order('joined_at', { ascending: false }),
       supabase.from('exit_requests').select('*').order('created_at', { ascending: false }),
       supabase.from('reports').select('*').order('created_at', { ascending: false }),
+      supabase.from('badges').select('*').order('name'),
+      supabase.from('user_badges').select('*').order('awarded_at', { ascending: false }),
     ]);
 
     if (requestsRes.data) setInitiationRequests(requestsRes.data as InitiationRequest[]);
@@ -168,6 +198,15 @@ const GuardianDashboard = () => {
         return { ...report, reporter: reporterRes.data, reported: reportedRes.data } as Report;
       }));
       setReports(reportsWithProfiles);
+    }
+    if (badgesRes.data) setBadges(badgesRes.data as BadgeItem[]);
+    if (userBadgesRes.data && profilesRes.data) {
+      const ubWithDetails = userBadgesRes.data.map((ub) => {
+        const badge = badgesRes.data?.find((b: BadgeItem) => b.id === ub.badge_id) || null;
+        const prof = profilesRes.data?.find((p: Profile) => p.id === ub.user_id) || null;
+        return { ...ub, badges: badge, profiles: prof ? { pseudonym: prof.pseudonym } : null } as UserBadge;
+      });
+      setUserBadges(ubWithDetails);
     }
 
     setLoading(false);
@@ -492,6 +531,39 @@ const GuardianDashboard = () => {
     fetchData();
   };
 
+  // Award badge
+  const handleAwardBadge = async () => {
+    if (!selectedBadgeId || !selectedMemberId || !user) return;
+    setLoading(true);
+    const { error } = await supabase.from('user_badges').insert([{
+      badge_id: selectedBadgeId,
+      user_id: selectedMemberId,
+      awarded_by: user.id,
+      reason: badgeReason || null,
+    }]);
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Médaille attribuée', description: 'La médaille a été attribuée avec succès.' });
+      setAwardBadgeOpen(false);
+      setSelectedBadgeId('');
+      setSelectedMemberId('');
+      setBadgeReason('');
+      fetchData();
+    }
+    setLoading(false);
+  };
+
+  const handleRevokeBadge = async (ubId: string) => {
+    const { error } = await supabase.from('user_badges').delete().eq('id', ubId);
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Médaille retirée' });
+      fetchData();
+    }
+  };
+
   // Filter profiles by search
   const filteredProfiles = profiles.filter(p => 
     p.pseudonym.toLowerCase().includes(searchTerm.toLowerCase())
@@ -545,7 +617,7 @@ const GuardianDashboard = () => {
 
         {/* Main Tabs */}
         <Tabs defaultValue="requests" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-secondary/50 mb-6">
+          <TabsList className="grid w-full grid-cols-5 bg-secondary/50 mb-6">
             <TabsTrigger value="requests" className="gap-2">
               <UserPlus className="w-4 h-4 hidden sm:block" />
               <span className="text-xs sm:text-sm">Demandes</span>
@@ -570,6 +642,10 @@ const GuardianDashboard = () => {
               {pendingExits.length > 0 && (
                 <Badge variant="destructive" className="ml-1 text-xs">{pendingExits.length}</Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="badges" className="gap-2">
+              <Medal className="w-4 h-4 hidden sm:block" />
+              <span className="text-xs sm:text-sm">Médailles</span>
             </TabsTrigger>
           </TabsList>
 
@@ -766,7 +842,114 @@ const GuardianDashboard = () => {
               ))
             )}
           </TabsContent>
+
+          {/* Badges Tab */}
+          <TabsContent value="badges" className="space-y-4">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setAwardBadgeOpen(true)} className="gap-2">
+                <Award className="w-4 h-4" />
+                Attribuer une médaille
+              </Button>
+            </div>
+
+            {/* Available badges */}
+            <div className="mb-6">
+              <h3 className="font-heading text-lg mb-3 text-gold-dim">Médailles disponibles</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {badges.map((badge) => (
+                  <div key={badge.id} className="ritual-card p-3 text-center">
+                    <span className="text-2xl block mb-1">{badge.icon}</span>
+                    <p className="text-sm font-heading">{badge.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{badge.description}</p>
+                    <Badge className="mt-2 text-[10px] bg-secondary text-secondary-foreground">{badge.rarity}</Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Awarded badges history */}
+            <div>
+              <h3 className="font-heading text-lg mb-3 text-gold-dim">Médailles attribuées</h3>
+              {userBadges.length === 0 ? (
+                <p className="text-center py-4 text-muted-foreground">Aucune médaille attribuée</p>
+              ) : (
+                userBadges.map((ub) => (
+                  <div key={ub.id} className="ritual-card p-3 flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{ub.badges?.icon || '🏅'}</span>
+                      <div>
+                        <p className="text-sm font-heading">{ub.badges?.name || 'Médaille'}</p>
+                        <p className="text-xs text-muted-foreground">
+                          → {ub.profiles?.pseudonym || 'Inconnu'} • {new Date(ub.awarded_at).toLocaleDateString('fr-FR')}
+                        </p>
+                        {ub.reason && <p className="text-[10px] text-muted-foreground italic">{ub.reason}</p>}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => handleRevokeBadge(ub.id)} className="text-destructive hover:text-destructive">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
+
+        {/* Award Badge Dialog */}
+        <Dialog open={awardBadgeOpen} onOpenChange={setAwardBadgeOpen}>
+          <DialogContent className="bg-card border-border max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Attribuer une médaille</DialogTitle>
+              <DialogDescription>
+                Choisissez un membre et une médaille à lui attribuer.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Membre</label>
+                <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner un membre..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {profiles.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.pseudonym} ({gradeLabels[p.grade]})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Médaille</label>
+                <Select value={selectedBadgeId} onValueChange={setSelectedBadgeId}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sélectionner une médaille..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {badges.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>{b.icon} {b.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Raison (optionnel)</label>
+                <Textarea
+                  value={badgeReason}
+                  onChange={(e) => setBadgeReason(e.target.value)}
+                  placeholder="Raison de l'attribution..."
+                  className="cipher-input"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setAwardBadgeOpen(false)}>Annuler</Button>
+              <Button onClick={handleAwardBadge} disabled={!selectedBadgeId || !selectedMemberId || loading}>
+                <Award className="w-4 h-4 mr-2" />
+                Attribuer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Initiation Request Dialog */}
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
