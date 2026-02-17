@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Settings, BarChart3, Newspaper, Hash } from 'lucide-react';
 import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel, Trophy } from 'lucide-react';
+import { CustomContextMenu } from './CustomContextMenu';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   };
 
   return (
+    <CustomContextMenu>
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-40 border-b border-gold-dim/20" style={{
@@ -171,5 +173,6 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </footer>
     </div>
+    </CustomContextMenu>
   );
 }
