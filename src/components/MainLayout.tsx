@@ -71,10 +71,10 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`nav-link flex items-center gap-2 relative ${isActive ? 'active' : ''}`}
+                    className={`nav-link nav-link-expand flex items-center gap-1.5 relative ${isActive ? 'active' : ''}`}
                   >
-                    <item.icon className="w-4 h-4" />
-                    <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
+                    <item.icon className="w-4 h-4 shrink-0" />
+                    <span className="nav-link-label text-sm font-heading-text tracking-wider">
                       {item.label}
                     </span>
                     {isMessages && unreadCount > 0 && (
@@ -90,11 +90,11 @@ export function MainLayout({ children }: MainLayoutProps) {
               {isGuardianSupreme && (
                 <Link
                   to="/knowledge"
-                  className={`nav-link flex items-center gap-2 ${location.pathname === '/knowledge' ? 'active' : ''}`}
+                  className={`nav-link nav-link-expand flex items-center gap-1.5 ${location.pathname === '/knowledge' ? 'active' : ''}`}
                   style={{ color: location.pathname === '/knowledge' ? 'hsl(var(--mystic-purple))' : undefined }}
                 >
-                  <Brain className="w-4 h-4" />
-                  <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
+                  <Brain className="w-4 h-4 shrink-0" />
+                  <span className="nav-link-label text-sm font-heading-text tracking-wider">
                     Savoir
                   </span>
                 </Link>
@@ -104,10 +104,10 @@ export function MainLayout({ children }: MainLayoutProps) {
               {isGuardianSupreme && (
                 <Link
                   to="/guardian"
-                  className={`nav-link flex items-center gap-2 ${location.pathname === '/guardian' ? 'active' : ''}`}
+                  className={`nav-link nav-link-expand flex items-center gap-1.5 ${location.pathname === '/guardian' ? 'active' : ''}`}
                 >
-                  <Shield className="w-4 h-4" />
-                  <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
+                  <Shield className="w-4 h-4 shrink-0" />
+                  <span className="nav-link-label text-sm font-heading-text tracking-wider">
                     Gardien
                   </span>
                 </Link>

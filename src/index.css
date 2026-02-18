@@ -218,6 +218,29 @@
     color: hsl(var(--muted-foreground));
   }
 
+  /* Expand label on hover */
+  .nav-link-expand .nav-link-label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-width 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nav-link-expand:hover .nav-link-label,
+  .nav-link-expand.active .nav-link-label {
+    max-width: 120px;
+    opacity: 1;
+  }
+
+  @media (min-width: 1280px) {
+    .nav-link-expand .nav-link-label {
+      max-width: 120px;
+      opacity: 1;
+    }
+  }
+
+
+
   .nav-link:hover {
     color: hsl(var(--gold-bright));
   }
