@@ -165,6 +165,16 @@ const GuardianDashboard = () => {
   const [selectedMemberId, setSelectedMemberId] = useState('');
   const [badgeReason, setBadgeReason] = useState('');
 
+  // Create badge states
+  const [createBadgeOpen, setCreateBadgeOpen] = useState(false);
+  const [newBadgeName, setNewBadgeName] = useState('');
+  const [newBadgeDescription, setNewBadgeDescription] = useState('');
+  const [newBadgeIcon, setNewBadgeIcon] = useState('🏅');
+  const [newBadgeCategory, setNewBadgeCategory] = useState('general');
+  const [newBadgeRarity, setNewBadgeRarity] = useState('common');
+  const [editBadgeOpen, setEditBadgeOpen] = useState(false);
+  const [editingBadge, setEditingBadge] = useState<BadgeItem | null>(null);
+
   // Fetch all data
   const fetchData = async () => {
     setLoading(true);
@@ -554,6 +564,75 @@ const GuardianDashboard = () => {
     setLoading(false);
   };
 
+  // Create badge
+  const handleCreateBadge = async () => {
+    if (!newBadgeName || !newBadgeDescription) return;
+    setLoading(true);
+    const { error } = await supabase.from('badges').insert([{
+      name: newBadgeName,
+      description: newBadgeDescription,
+      icon: newBadgeIcon || '🏅',
+      category: newBadgeCategory,
+      rarity: newBadgeRarity,
+    }]);
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Médaille créée', description: `"${newBadgeName}" a été ajoutée.` });
+      setCreateBadgeOpen(false);
+      setNewBadgeName('');
+      setNewBadgeDescription('');
+      setNewBadgeIcon('🏅');
+      setNewBadgeCategory('general');
+      setNewBadgeRarity('common');
+      fetchData();
+    }
+    setLoading(false);
+  };
+
+  // Update badge
+  const handleUpdateBadge = async () => {
+    if (!editingBadge) return;
+    setLoading(true);
+    const { error } = await supabase.from('badges').update({
+      name: newBadgeName,
+      description: newBadgeDescription,
+      icon: newBadgeIcon,
+      category: newBadgeCategory,
+      rarity: newBadgeRarity,
+    }).eq('id', editingBadge.id);
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Médaille modifiée' });
+      setEditBadgeOpen(false);
+      setEditingBadge(null);
+      fetchData();
+    }
+    setLoading(false);
+  };
+
+  const openEditBadge = (badge: BadgeItem) => {
+    setEditingBadge(badge);
+    setNewBadgeName(badge.name);
+    setNewBadgeDescription(badge.description);
+    setNewBadgeIcon(badge.icon);
+    setNewBadgeCategory(badge.category);
+    setNewBadgeRarity(badge.rarity);
+    setEditBadgeOpen(true);
+  };
+
+  // Delete badge
+  const handleDeleteBadge = async (badgeId: string) => {
+    const { error } = await supabase.from('badges').delete().eq('id', badgeId);
+    if (error) {
+      toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Médaille supprimée' });
+      fetchData();
+    }
+  };
+
   const handleRevokeBadge = async (ubId: string) => {
     const { error } = await supabase.from('user_badges').delete().eq('id', ubId);
     if (error) {
@@ -845,7 +924,18 @@ const GuardianDashboard = () => {
 
           {/* Badges Tab */}
           <TabsContent value="badges" className="space-y-4">
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end gap-2 mb-4">
+              <Button variant="outline" onClick={() => {
+                setNewBadgeName('');
+                setNewBadgeDescription('');
+                setNewBadgeIcon('🏅');
+                setNewBadgeCategory('general');
+                setNewBadgeRarity('common');
+                setCreateBadgeOpen(true);
+              }} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Créer une médaille
+              </Button>
               <Button onClick={() => setAwardBadgeOpen(true)} className="gap-2">
                 <Award className="w-4 h-4" />
                 Attribuer une médaille
@@ -856,14 +946,29 @@ const GuardianDashboard = () => {
             <div className="mb-6">
               <h3 className="font-heading text-lg mb-3 text-gold-dim">Médailles disponibles</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {badges.map((badge) => (
-                  <div key={badge.id} className="ritual-card p-3 text-center">
-                    <span className="text-2xl block mb-1">{badge.icon}</span>
-                    <p className="text-sm font-heading">{badge.name}</p>
-                    <p className="text-[10px] text-muted-foreground mt-1">{badge.description}</p>
-                    <Badge className="mt-2 text-[10px] bg-secondary text-secondary-foreground">{badge.rarity}</Badge>
-                  </div>
-                ))}
+                {badges.map((badge) => {
+                  const rarityColor = badge.rarity === 'spécial' ? 'bg-purple-500/20 text-purple-300' :
+                    badge.rarity === 'legendary' ? 'bg-amber-500/20 text-amber-300' :
+                    badge.rarity === 'epic' ? 'bg-fuchsia-500/20 text-fuchsia-300' :
+                    badge.rarity === 'rare' ? 'bg-blue-500/20 text-blue-300' :
+                    'bg-secondary text-secondary-foreground';
+                  return (
+                    <div key={badge.id} className="ritual-card p-3 text-center relative group">
+                      <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => openEditBadge(badge)}>
+                          <Edit className="w-3 h-3" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive" onClick={() => handleDeleteBadge(badge.id)}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                      <span className="text-2xl block mb-1">{badge.icon}</span>
+                      <p className="text-sm font-heading">{badge.name}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{badge.description}</p>
+                      <Badge className={`mt-2 text-[10px] ${rarityColor}`}>{badge.rarity}</Badge>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -951,7 +1056,126 @@ const GuardianDashboard = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Initiation Request Dialog */}
+        {/* Create Badge Dialog */}
+        <Dialog open={createBadgeOpen} onOpenChange={setCreateBadgeOpen}>
+          <DialogContent className="bg-card border-border max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Créer une médaille</DialogTitle>
+              <DialogDescription>Définissez les caractéristiques de la nouvelle médaille.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Nom</label>
+                <Input value={newBadgeName} onChange={(e) => setNewBadgeName(e.target.value)} placeholder="Nom de la médaille..." className="cipher-input" />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Description</label>
+                <Textarea value={newBadgeDescription} onChange={(e) => setNewBadgeDescription(e.target.value)} placeholder="Description..." className="cipher-input" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground">Icône (emoji)</label>
+                  <Input value={newBadgeIcon} onChange={(e) => setNewBadgeIcon(e.target.value)} placeholder="🏅" className="cipher-input" />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground">Catégorie</label>
+                  <Select value={newBadgeCategory} onValueChange={setNewBadgeCategory}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">Général</SelectItem>
+                      <SelectItem value="combat">Combat</SelectItem>
+                      <SelectItem value="wisdom">Sagesse</SelectItem>
+                      <SelectItem value="loyalty">Loyauté</SelectItem>
+                      <SelectItem value="mystery">Mystère</SelectItem>
+                      <SelectItem value="special">Spécial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Rareté</label>
+                <Select value={newBadgeRarity} onValueChange={setNewBadgeRarity}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="common">Commune</SelectItem>
+                    <SelectItem value="rare">Rare</SelectItem>
+                    <SelectItem value="epic">Épique</SelectItem>
+                    <SelectItem value="legendary">Légendaire</SelectItem>
+                    <SelectItem value="spécial">✦ Spécial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setCreateBadgeOpen(false)}>Annuler</Button>
+              <Button onClick={handleCreateBadge} disabled={!newBadgeName || !newBadgeDescription || loading}>
+                <Plus className="w-4 h-4 mr-2" />
+                Créer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Badge Dialog */}
+        <Dialog open={editBadgeOpen} onOpenChange={setEditBadgeOpen}>
+          <DialogContent className="bg-card border-border max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="font-heading">Modifier la médaille</DialogTitle>
+              <DialogDescription>Modifiez les caractéristiques de cette médaille.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-muted-foreground">Nom</label>
+                <Input value={newBadgeName} onChange={(e) => setNewBadgeName(e.target.value)} className="cipher-input" />
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Description</label>
+                <Textarea value={newBadgeDescription} onChange={(e) => setNewBadgeDescription(e.target.value)} className="cipher-input" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground">Icône (emoji)</label>
+                  <Input value={newBadgeIcon} onChange={(e) => setNewBadgeIcon(e.target.value)} className="cipher-input" />
+                </div>
+                <div>
+                  <label className="text-sm text-muted-foreground">Catégorie</label>
+                  <Select value={newBadgeCategory} onValueChange={setNewBadgeCategory}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="general">Général</SelectItem>
+                      <SelectItem value="combat">Combat</SelectItem>
+                      <SelectItem value="wisdom">Sagesse</SelectItem>
+                      <SelectItem value="loyalty">Loyauté</SelectItem>
+                      <SelectItem value="mystery">Mystère</SelectItem>
+                      <SelectItem value="special">Spécial</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground">Rareté</label>
+                <Select value={newBadgeRarity} onValueChange={setNewBadgeRarity}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="common">Commune</SelectItem>
+                    <SelectItem value="rare">Rare</SelectItem>
+                    <SelectItem value="epic">Épique</SelectItem>
+                    <SelectItem value="legendary">Légendaire</SelectItem>
+                    <SelectItem value="spécial">✦ Spécial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="ghost" onClick={() => setEditBadgeOpen(false)}>Annuler</Button>
+              <Button onClick={handleUpdateBadge} disabled={!newBadgeName || !newBadgeDescription || loading}>
+                <Check className="w-4 h-4 mr-2" />
+                Enregistrer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
           <DialogContent className="bg-card border-border max-w-lg">
             <DialogHeader>
