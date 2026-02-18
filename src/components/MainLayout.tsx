@@ -63,7 +63,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-1">
+            <nav className="flex items-center gap-1 ml-4">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 const isMessages = item.path === '/messages';
