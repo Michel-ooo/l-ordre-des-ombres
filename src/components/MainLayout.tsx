@@ -48,22 +48,22 @@ export function MainLayout({ children }: MainLayoutProps) {
         background: 'linear-gradient(180deg, hsl(30 10% 3% / 0.95) 0%, hsl(30 10% 3% / 0.85) 100%)',
         backdropFilter: 'blur(16px)',
       }}>
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
               <img 
                 src={logo} 
                 alt="L'Ordre" 
-                className="w-10 h-10 transition-all duration-500 group-hover:lunar-glow"
+                className="w-8 h-8 sm:w-10 sm:h-10 transition-all duration-500 group-hover:lunar-glow"
               />
-              <span className="font-heading text-sm tracking-[0.2em] hidden sm:block text-gold-dim group-hover:text-gold transition-colors duration-300">
+              <span className="font-heading text-xs sm:text-sm tracking-[0.2em] hidden lg:block text-gold-dim group-hover:text-gold transition-colors duration-300">
                 L'ORDRE
               </span>
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-1 ml-4">
+            <nav className="flex items-center gap-0.5 sm:gap-1 ml-2 overflow-x-auto scrollbar-none">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 const isMessages = item.path === '/messages';
@@ -74,7 +74,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     className={`nav-link flex items-center gap-2 relative ${isActive ? 'active' : ''}`}
                   >
                     <item.icon className="w-4 h-4" />
-                    <span className="hidden md:inline text-sm font-heading-text tracking-wider">
+                    <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
                       {item.label}
                     </span>
                     {isMessages && unreadCount > 0 && (
@@ -94,7 +94,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   style={{ color: location.pathname === '/knowledge' ? 'hsl(var(--mystic-purple))' : undefined }}
                 >
                   <Brain className="w-4 h-4" />
-                  <span className="hidden md:inline text-sm font-heading-text tracking-wider">
+                  <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
                     Savoir
                   </span>
                 </Link>
@@ -107,7 +107,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   className={`nav-link flex items-center gap-2 ${location.pathname === '/guardian' ? 'active' : ''}`}
                 >
                   <Shield className="w-4 h-4" />
-                  <span className="hidden md:inline text-sm font-heading-text tracking-wider">
+                  <span className="hidden lg:inline text-sm font-heading-text tracking-wider">
                     Gardien
                   </span>
                 </Link>
