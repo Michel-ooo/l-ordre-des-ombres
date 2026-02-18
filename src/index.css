@@ -214,7 +214,7 @@
 
   /* Gothic navigation */
   .nav-link {
-    @apply relative px-4 py-2 transition-all duration-300;
+    @apply relative px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 transition-all duration-300 whitespace-nowrap text-xs sm:text-sm;
     color: hsl(var(--muted-foreground));
   }
 
@@ -430,4 +430,13 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Hide scrollbar utility */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
