@@ -17,6 +17,7 @@ const ProfileSettingsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isSupported: pushSupported, isSubscribed: pushSubscribed, permission: pushPermission, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications();
 
   const [pseudonym, setPseudonym] = useState(profile?.pseudonym || '');
   const [email, setEmail] = useState(user?.email || '');
