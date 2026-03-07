@@ -7,12 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, Save, Lock, Mail, User, Loader2 } from 'lucide-react';
+import { Camera, Save, Lock, Mail, User, Loader2, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const ProfileSettingsPage = () => {
   const { user, profile, refreshProfile, isGuardianSupreme } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [pseudonym, setPseudonym] = useState(profile?.pseudonym || '');
@@ -203,6 +205,29 @@ const ProfileSettingsPage = () => {
           </div>
           <Button onClick={handleUpdatePassword} disabled={saving || !newPassword || !confirmPassword} className="w-full gap-2">
             <Lock className="w-4 h-4" /> Changer le mot de passe
+          </Button>
+        </motion.div>
+        {/* Sign out all devices */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+          className="ritual-card p-6 space-y-4 border-destructive/30"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <LogOut className="w-5 h-5 text-destructive" />
+            <h2 className="font-heading text-sm tracking-wider text-destructive">DÉCONNEXION GLOBALE</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Déconnecte votre compte de tous les appareils et navigateurs. Vous devrez vous reconnecter partout.
+          </p>
+          <Button
+            variant="destructive"
+            className="w-full gap-2"
+            onClick={async () => {
+              await supabase.auth.signOut({ scope: 'global' });
+              toast({ title: 'Déconnexion globale effectuée', description: 'Tous vos appareils ont été déconnectés.' });
+              navigate('/auth');
+            }}
+          >
+            <LogOut className="w-4 h-4" /> Se déconnecter de tous les appareils
           </Button>
         </motion.div>
       </div>
