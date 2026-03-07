@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 const ProfileSettingsPage = () => {
   const { user, profile, refreshProfile, isGuardianSupreme } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [pseudonym, setPseudonym] = useState(profile?.pseudonym || '');
