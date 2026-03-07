@@ -246,15 +246,16 @@ const MessagesPage = () => {
   }, [selectedMember, user]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedMember) return;
+    if (!newMessage.trim() || !selectedMember || !user) return;
     
     setIsSending(true);
+    const messageContent = newMessage.trim();
     
     const { error } = await supabase.from("messages").insert({
-      sender_id: user?.id,
+      sender_id: user.id,
       recipient_id: selectedMember.id,
       subject: "SMS",
-      content: newMessage.trim(),
+      content: messageContent,
     });
     
     if (error) {
@@ -266,6 +267,15 @@ const MessagesPage = () => {
       });
     } else {
       setNewMessage("");
+      // Send push notification (fire and forget)
+      import('@/hooks/usePushNotifications').then(({ sendPushNotification }) => {
+        sendPushNotification(
+          [selectedMember.id],
+          "☽ Message privé",
+          messageContent.length > 100 ? messageContent.slice(0, 100) + "…" : messageContent,
+          "/messages"
+        );
+      });
     }
     
     setIsSending(false);
