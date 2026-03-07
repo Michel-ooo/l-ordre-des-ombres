@@ -7,9 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, Save, Lock, Mail, User, Loader2, LogOut } from 'lucide-react';
+import { Camera, Save, Lock, Mail, User, Loader2, LogOut, Bell, BellOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const ProfileSettingsPage = () => {
   const { user, profile, refreshProfile, isGuardianSupreme } = useAuth();
