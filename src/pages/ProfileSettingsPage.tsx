@@ -207,6 +207,29 @@ const ProfileSettingsPage = () => {
             <Lock className="w-4 h-4" /> Changer le mot de passe
           </Button>
         </motion.div>
+        {/* Sign out all devices */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+          className="ritual-card p-6 space-y-4 border-destructive/30"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <LogOut className="w-5 h-5 text-destructive" />
+            <h2 className="font-heading text-sm tracking-wider text-destructive">DÉCONNEXION GLOBALE</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Déconnecte votre compte de tous les appareils et navigateurs. Vous devrez vous reconnecter partout.
+          </p>
+          <Button
+            variant="destructive"
+            className="w-full gap-2"
+            onClick={async () => {
+              await supabase.auth.signOut({ scope: 'global' });
+              toast({ title: 'Déconnexion globale effectuée', description: 'Tous vos appareils ont été déconnectés.' });
+              navigate('/auth');
+            }}
+          >
+            <LogOut className="w-4 h-4" /> Se déconnecter de tous les appareils
+          </Button>
+        </motion.div>
       </div>
     </MainLayout>
   );
