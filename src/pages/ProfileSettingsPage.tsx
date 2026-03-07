@@ -209,8 +209,50 @@ const ProfileSettingsPage = () => {
             <Lock className="w-4 h-4" /> Changer le mot de passe
           </Button>
         </motion.div>
-        {/* Sign out all devices */}
+
+        {/* Push Notifications */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
+          className="ritual-card p-6 space-y-4"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <Bell className="w-5 h-5 text-primary" />
+            <h2 className="font-heading text-sm tracking-wider">NOTIFICATIONS PUSH</h2>
+          </div>
+          {!pushSupported ? (
+            <p className="text-sm text-muted-foreground">Votre navigateur ne supporte pas les notifications push.</p>
+          ) : pushSubscribed ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                ✅ Les notifications push sont activées. Vous recevrez une alerte pour chaque nouveau message.
+              </p>
+              <Button variant="outline" className="w-full gap-2" onClick={async () => {
+                await pushUnsubscribe();
+                toast({ title: 'Notifications désactivées' });
+              }}>
+                <BellOff className="w-4 h-4" /> Désactiver les notifications
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Activez les notifications pour être alerté des nouveaux messages même quand l'app est fermée.
+              </p>
+              <Button className="w-full gap-2" onClick={async () => {
+                const success = await pushSubscribe();
+                if (success) {
+                  toast({ title: '🔔 Notifications activées', description: 'Vous recevrez les alertes sur cet appareil.' });
+                } else if (pushPermission === 'denied') {
+                  toast({ title: 'Notifications bloquées', description: 'Autorisez les notifications dans les paramètres de votre navigateur.', variant: 'destructive' });
+                }
+              }}>
+                <Bell className="w-4 h-4" /> Activer les notifications
+              </Button>
+            </>
+          )}
+        </motion.div>
+
+        {/* Sign out all devices */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
           className="ritual-card p-6 space-y-4 border-destructive/30"
         >
           <div className="flex items-center gap-2 mb-2">
