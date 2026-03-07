@@ -112,15 +112,29 @@ const ChannelsPage = () => {
   const handleSend = async () => {
     if (!newMessage.trim() || !selectedChannel || !user) return;
     setIsSending(true);
+    const messageContent = newMessage.trim();
     const { error } = await supabase.from('group_messages').insert({
       channel_id: selectedChannel.id,
       sender_id: user.id,
-      content: newMessage.trim(),
+      content: messageContent,
     });
     if (error) {
       toast({ title: 'Erreur', description: error.message, variant: 'destructive' });
     } else {
       setNewMessage('');
+      // Send push to all other members (fire and forget)
+      const otherMembers = Array.from(profiles.keys()).filter(id => id !== user.id);
+      if (otherMembers.length > 0) {
+        import('@/hooks/usePushNotifications').then(({ sendPushNotification }) => {
+          const senderName = profiles.get(user.id)?.pseudonym || 'Membre';
+          sendPushNotification(
+            otherMembers,
+            `☽ #${selectedChannel.name}`,
+            `${senderName}: ${messageContent.length > 80 ? messageContent.slice(0, 80) + '…' : messageContent}`,
+            '/channels'
+          );
+        });
+      }
     }
     setIsSending(false);
   };
