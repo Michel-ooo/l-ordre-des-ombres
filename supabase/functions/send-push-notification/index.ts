@@ -73,11 +73,20 @@ async function createVapidJwt(
   const payloadB64 = base64UrlEncode(new TextEncoder().encode(JSON.stringify(payload)));
   const unsignedToken = `${headerB64}.${payloadB64}`;
 
-  // Import private key
+  // Import private key using JWK format
   const privKeyBytes = base64UrlDecode(privateKey);
+  const pubKeyBytes = base64UrlDecode(publicKey);
+
+  // Public key is 65 bytes uncompressed: 0x04 || x(32) || y(32)
+  const x = base64UrlEncode(pubKeyBytes.slice(1, 33));
+  const y = base64UrlEncode(pubKeyBytes.slice(33, 65));
+  const d = base64UrlEncode(privKeyBytes.slice(0, 32));
+
+  const jwk = { kty: "EC", crv: "P-256", x, y, d };
+
   const cryptoKey = await crypto.subtle.importKey(
-    "pkcs8",
-    convertRawPrivateKeyToPKCS8(privKeyBytes),
+    "jwk",
+    jwk,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"]
@@ -89,29 +98,10 @@ async function createVapidJwt(
     new TextEncoder().encode(unsignedToken)
   );
 
-  // Convert DER signature to raw r||s
   const rawSig = derToRaw(new Uint8Array(signature));
   const sigB64 = base64UrlEncode(rawSig);
 
   return `${unsignedToken}.${sigB64}`;
-}
-
-function convertRawPrivateKeyToPKCS8(rawKey: Uint8Array): ArrayBuffer {
-  // PKCS8 wrapper for EC P-256 private key
-  const pkcs8Header = new Uint8Array([
-    0x30, 0x81, 0x87, 0x02, 0x01, 0x00, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86,
-    0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d,
-    0x03, 0x01, 0x07, 0x04, 0x6d, 0x30, 0x6b, 0x02, 0x01, 0x01, 0x04, 0x20,
-  ]);
-  const pkcs8Footer = new Uint8Array([
-    0xa1, 0x44, 0x03, 0x42, 0x00,
-  ]);
-
-  // We only have the 32-byte raw key, we need to construct without public key
-  const result = new Uint8Array(pkcs8Header.length + 32);
-  result.set(pkcs8Header);
-  result.set(rawKey.slice(0, 32), pkcs8Header.length);
-  return result.buffer;
 }
 
 function derToRaw(der: Uint8Array): Uint8Array {
