@@ -67,11 +67,24 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const notificationActions = actions || [
+      { action: "view", title: "👁 Voir" },
+      { action: "reply", title: "✍ Répondre" },
+    ];
+
     const payload = JSON.stringify({
       title: title || "☽ L'Ordre des Ombres",
       body: body || "Nouveau message reçu.",
-      icon: "/favicon.ico",
-      data: { url: url || "/messages" },
+      icon: icon || "/notification-icon.png",
+      badge: badge || "/notification-badge.png",
+      tag: tag || "ordre-notification",
+      actions: notificationActions,
+      data: { 
+        url: url || "/messages",
+        replyUrl: url || "/messages",
+        viewUrl: url || "/messages",
+        ...extraData,
+      },
     });
 
     let sent = 0;
