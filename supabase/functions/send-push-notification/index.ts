@@ -36,7 +36,7 @@ Deno.serve(async (req: Request) => {
       cleanPrivateKey
     );
 
-    const { recipientIds, title, body, url } = await req.json();
+    const { recipientIds, title, body, url, icon, badge, tag, actions, data: extraData } = await req.json();
 
     if (!recipientIds || !Array.isArray(recipientIds) || recipientIds.length === 0) {
       return new Response(
