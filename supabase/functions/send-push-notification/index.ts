@@ -25,10 +25,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Ensure keys are URL-safe base64 without padding
+    const cleanPublicKey = vapidPublicKey.replace(/=+$/, "");
+    const cleanPrivateKey = vapidPrivateKey.replace(/=+$/, "");
+
     webpush.setVapidDetails(
       "mailto:ordre@lovable.app",
-      vapidPublicKey,
-      vapidPrivateKey
+      cleanPublicKey,
+      cleanPrivateKey
     );
 
     const { recipientIds, title, body, url } = await req.json();
