@@ -48,12 +48,13 @@ export function usePushNotifications() {
       setPermission(perm);
       if (perm !== 'granted') return false;
 
-      // Get VAPID public key from env
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-      if (!vapidPublicKey) {
-        console.error('VAPID public key not configured');
+      // Get VAPID public key from edge function
+      const { data: vapidData, error: vapidError } = await supabase.functions.invoke('get-vapid-key');
+      if (vapidError || !vapidData?.vapidPublicKey) {
+        console.error('Failed to get VAPID key:', vapidError);
         return false;
       }
+      const vapidPublicKey = vapidData.vapidPublicKey;
 
       // Convert VAPID key to Uint8Array
       const urlBase64ToUint8Array = (base64String: string) => {
