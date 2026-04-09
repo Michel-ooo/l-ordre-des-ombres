@@ -29,12 +29,84 @@ const DECOY_WORDS = [
   'clé', 'sceau', 'prophétie', 'songe', 'spectre', 'relique',
 ];
 
+const DEFAULT_DICT: DictEntry[] = [
+  { real: 'je', coded: 'le' },
+  { real: 'tu', coded: 'vent' },
+  { real: 'il', coded: 'écrit' },
+  { real: 'elle', coded: 'des' },
+  { real: 'nous', coded: 'lettres' },
+  { real: 'vous', coded: 'que' },
+  { real: 'ils', coded: 'le' },
+  { real: 'elles', coded: 'temps' },
+  { real: 'on', coded: 'refuse' },
+  { real: 'faire', coded: 'de' },
+  { real: 'dire', coded: 'lire' },
+  { real: 'voir', coded: 'ombre' },
+  { real: 'savoir', coded: 'clé' },
+  { real: 'venir', coded: 'silence' },
+  { real: 'partir', coded: 'mur' },
+  { real: 'prendre', coded: 'pluie' },
+  { real: 'donner', coded: 'nuit' },
+  { real: 'attendre', coded: 'lumière' },
+  { real: 'écouter', coded: 'ombrelle' },
+  { real: 'parler', coded: 'porte' },
+  { real: 'répondre', coded: 'fenêtre' },
+  { real: 'manger', coded: 'étoile' },
+  { real: 'boire', coded: 'soleil' },
+  { real: 'aimer', coded: 'lune' },
+  { real: 'marcher', coded: 'feuille' },
+  { real: 'courir', coded: 'fleur' },
+  { real: 'regarder', coded: 'oiseau' },
+  { real: 'jouer', coded: 'chat' },
+  { real: 'acheter', coded: 'chien' },
+  { real: 'vendre', coded: 'eau' },
+  { real: 'ouvrir', coded: 'feu' },
+  { real: 'fermer', coded: 'terre' },
+  { real: 'chercher', coded: 'air' },
+  { real: 'trouver', coded: 'montagne' },
+  { real: 'penser', coded: 'rivière' },
+  { real: 'entendre', coded: 'forêt' },
+  { real: 'argent', coded: 'éclat' },
+  { real: 'temps', coded: 'souffle' },
+  { real: 'travail', coded: 'ombrette' },
+  { real: 'maison', coded: 'sanctuaire' },
+  { real: 'jardin', coded: 'labyrinthe' },
+  { real: 'école', coded: 'agora' },
+  { real: 'livre', coded: 'grimoire' },
+  { real: 'stylo', coded: 'plume_noire' },
+  { real: 'table', coded: 'autel' },
+  { real: 'chaise', coded: 'trône' },
+  { real: 'ami', coded: 'spectre' },
+  { real: 'famille', coded: 'lignée' },
+  { real: 'père', coded: 'gardien' },
+  { real: 'mère', coded: 'sentinelle' },
+  { real: 'frère', coded: 'compagnon' },
+  { real: 'sœur', coded: 'sœur_fantôme' },
+  { real: 'enfant', coded: 'petit_astre' },
+  { real: 'personne', coded: 'voyageur' },
+  { real: 'monde', coded: 'théâtre' },
+  { real: 'vie', coded: 'fil' },
+  { real: 'cœur', coded: 'cristal' },
+  { real: 'esprit', coded: 'écho' },
+  { real: 'mot', coded: 'murmure' },
+  { real: 'phrase', coded: 'chant' },
+  { real: 'idée', coded: 'vision' },
+  { real: 'secret', coded: 'parchemin' },
+  { real: 'rêve', coded: 'voile' },
+  { real: 'pensée', coded: 'ombre_douce' },
+  { real: 'souvenir', coded: 'reflet' },
+  { real: 'sentiment', coded: 'éclat_sombre' },
+  { real: 'regard', coded: 'lumière_sifflante' },
+  { real: 'voix', coded: 'souffle_perdu' },
+  { real: 'silence', coded: 'abîme' },
+];
+
 function loadDict(): DictEntry[] {
   try {
     const raw = localStorage.getItem(DICT_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return raw ? JSON.parse(raw) : DEFAULT_DICT;
   } catch {
-    return [];
+    return DEFAULT_DICT;
   }
 }
 
