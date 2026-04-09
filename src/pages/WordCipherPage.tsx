@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { MainLayout } from '@/components/MainLayout';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
-  Plus, Lock, Unlock, BookOpen, Download, Upload, Trash2, 
+  Lock, Unlock, BookOpen, 
   Shuffle, Search, Copy, ArrowRightLeft
 } from 'lucide-react';
-
-const DICT_STORAGE_KEY = 'ordre_word_cipher_dict';
 
 interface DictEntry {
   real: string;
@@ -27,9 +25,12 @@ const DECOY_WORDS = [
   'guide', 'symbole', 'ancien', 'voile', 'destin', 'rune', 'cendre',
   'cristal', 'sanctuaire', 'initié', 'ténèbre', 'aurore', 'portail',
   'clé', 'sceau', 'prophétie', 'songe', 'spectre', 'relique',
+  'crépuscule', 'brume', 'éphémère', 'mélancolie', 'oubli', 'solitude',
 ];
 
-const DEFAULT_DICT: DictEntry[] = [
+// Dictionnaire officiel — fixe et obligatoire
+const OFFICIAL_DICT: DictEntry[] = [
+  // Pronoms
   { real: 'je', coded: 'le' },
   { real: 'tu', coded: 'vent' },
   { real: 'il', coded: 'écrit' },
@@ -39,6 +40,7 @@ const DEFAULT_DICT: DictEntry[] = [
   { real: 'ils', coded: 'le' },
   { real: 'elles', coded: 'temps' },
   { real: 'on', coded: 'refuse' },
+  // Verbes courants
   { real: 'faire', coded: 'de' },
   { real: 'dire', coded: 'lire' },
   { real: 'voir', coded: 'ombre' },
@@ -66,6 +68,7 @@ const DEFAULT_DICT: DictEntry[] = [
   { real: 'trouver', coded: 'montagne' },
   { real: 'penser', coded: 'rivière' },
   { real: 'entendre', coded: 'forêt' },
+  // Noms courants
   { real: 'argent', coded: 'éclat' },
   { real: 'temps', coded: 'souffle' },
   { real: 'travail', coded: 'ombrette' },
@@ -99,79 +102,129 @@ const DEFAULT_DICT: DictEntry[] = [
   { real: 'regard', coded: 'lumière_sifflante' },
   { real: 'voix', coded: 'souffle_perdu' },
   { real: 'silence', coded: 'abîme' },
+  // Mots poétiques & mélancoliques
+  { real: 'tristesse', coded: 'brume_éternelle' },
+  { real: 'solitude', coded: 'île_perdue' },
+  { real: 'mélancolie', coded: 'crépuscule_violet' },
+  { real: 'nostalgie', coded: 'cendre_tiède' },
+  { real: 'douleur', coded: 'épine_noire' },
+  { real: 'larme', coded: 'perle_brisée' },
+  { real: 'oubli', coded: 'sable_mouvant' },
+  { real: 'absence', coded: 'vide_lunaire' },
+  { real: 'regret', coded: 'écho_lointain' },
+  { real: 'errance', coded: 'sentier_perdu' },
+  { real: 'ténèbres', coded: 'manteau_nocturne' },
+  { real: 'crépuscule', coded: 'heure_dorée' },
+  { real: 'aurore', coded: 'sang_du_ciel' },
+  { real: 'brume', coded: 'haleine_froide' },
+  { real: 'tempête', coded: 'colère_du_vent' },
+  { real: 'froid', coded: 'souffle_blanc' },
+  { real: 'nuit', coded: 'velours_sombre' },
+  { real: 'lune', coded: 'œil_pâle' },
+  { real: 'étoile', coded: 'clou_d_argent' },
+  { real: 'ombre', coded: 'double_silencieux' },
+  { real: 'flamme', coded: 'langue_rouge' },
+  { real: 'cendre', coded: 'mémoire_grise' },
+  { real: 'ruine', coded: 'squelette_de_pierre' },
+  { real: 'fantôme', coded: 'visiteur_pâle' },
+  { real: 'spectre', coded: 'ancien_témoin' },
+  { real: 'tombeau', coded: 'lit_éternel' },
+  { real: 'poussière', coded: 'poudre_du_temps' },
+  { real: 'miroir', coded: 'lac_immobile' },
+  { real: 'masque', coded: 'second_visage' },
+  { real: 'destin', coded: 'fil_invisible' },
+  { real: 'fatalité', coded: 'nœud_noir' },
+  { real: 'espoir', coded: 'lueur_fragile' },
+  { real: 'promesse', coded: 'serment_gravé' },
+  { real: 'trahison', coded: 'lame_cachée' },
+  { real: 'abandon', coded: 'rive_déserte' },
+  { real: 'attente', coded: 'horloge_muette' },
+  { real: 'éternité', coded: 'boucle_sans_fin' },
+  { real: 'infini', coded: 'horizon_courbe' },
+  { real: 'néant', coded: 'page_blanche' },
+  { real: 'âme', coded: 'flamme_intérieure' },
+  { real: 'murmure', coded: 'vent_tiède' },
+  { real: 'soupir', coded: 'feuille_tombante' },
+  { real: 'pleur', coded: 'rosée_amère' },
+  { real: 'chagrin', coded: 'poids_invisible' },
+  { real: 'détresse', coded: 'marée_noire' },
+  { real: 'angoisse', coded: 'nœud_au_ventre' },
+  { real: 'peur', coded: 'souffle_glacé' },
+  { real: 'courage', coded: 'acier_brûlant' },
+  { real: 'honneur', coded: 'lame_droite' },
+  { real: 'serment', coded: 'pierre_scellée' },
+  { real: 'pardon', coded: 'pluie_douce' },
+  { real: 'vengeance', coded: 'feu_dormant' },
+  { real: 'liberté', coded: 'ciel_ouvert' },
+  { real: 'prison', coded: 'cage_de_verre' },
+  { real: 'chaîne', coded: 'serpent_froid' },
+  { real: 'blessure', coded: 'sillon_rouge' },
+  { real: 'cicatrice', coded: 'carte_ancienne' },
+  { real: 'sang', coded: 'encre_vive' },
+  { real: 'mort', coded: 'dernier_pas' },
+  { real: 'naissance', coded: 'premier_cri' },
+  { real: 'amour', coded: 'vertige_sacré' },
+  { real: 'haine', coded: 'braise_froide' },
+  { real: 'joie', coded: 'éclat_bref' },
+  { real: 'bonheur', coded: 'instant_doré' },
+  { real: 'malheur', coded: 'ombre_longue' },
+  { real: 'beauté', coded: 'aube_fragile' },
+  { real: 'laideur', coded: 'reflet_tordu' },
+  { real: 'vérité', coded: 'miroir_nu' },
+  { real: 'mensonge', coded: 'soie_peinte' },
+  { real: 'mystère', coded: 'porte_close' },
+  { real: 'légende', coded: 'encre_ancienne' },
+  { real: 'prophétie', coded: 'fumée_parlante' },
+  { real: 'oracle', coded: 'bouche_aveugle' },
+  { real: 'rituel', coded: 'danse_lente' },
+  { real: 'prière', coded: 'souffle_montant' },
+  { real: 'malédiction', coded: 'racine_noire' },
+  { real: 'bénédiction', coded: 'rosée_claire' },
+  { real: 'sacrifice', coded: 'offrande_muette' },
+  { real: 'résurrection', coded: 'graine_enfouie' },
+  { real: 'voyage', coded: 'horizon_brisé' },
+  { real: 'exil', coded: 'terre_lointaine' },
+  { real: 'retour', coded: 'cercle_fermé' },
+  { real: 'chemin', coded: 'fil_de_terre' },
+  { real: 'forêt', coded: 'cathédrale_verte' },
+  { real: 'mer', coded: 'miroir_agité' },
+  { real: 'montagne', coded: 'dos_du_monde' },
+  { real: 'rivière', coded: 'veine_bleue' },
+  { real: 'pluie', coded: 'larme_du_ciel' },
+  { real: 'neige', coded: 'cendre_blanche' },
+  { real: 'soleil', coded: 'roi_brûlant' },
+  { real: 'rose', coded: 'blessure_douce' },
+  { real: 'loup', coded: 'ombre_errante' },
+  { real: 'corbeau', coded: 'messager_noir' },
+  { real: 'papillon', coded: 'souffle_coloré' },
 ];
-
-function loadDict(): DictEntry[] {
-  try {
-    const raw = localStorage.getItem(DICT_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : DEFAULT_DICT;
-  } catch {
-    return DEFAULT_DICT;
-  }
-}
-
-function saveDict(dict: DictEntry[]) {
-  localStorage.setItem(DICT_STORAGE_KEY, JSON.stringify(dict));
-}
 
 function generateDecoyPhrase(length: number = 8): string {
   const words: string[] = [];
   for (let i = 0; i < length; i++) {
     words.push(DECOY_WORDS[Math.floor(Math.random() * DECOY_WORDS.length)]);
   }
-  // Capitalize first word
   words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
   return words.join(' ') + '.';
 }
 
 const WordCipherPage = () => {
-  const [dict, setDict] = useState<DictEntry[]>(loadDict);
-  const [newReal, setNewReal] = useState('');
-  const [newCoded, setNewCoded] = useState('');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [decoyPhrase, setDecoyPhrase] = useState('');
-
-  useEffect(() => {
-    saveDict(dict);
-  }, [dict]);
-
-  const addEntry = () => {
-    const real = newReal.trim().toLowerCase();
-    const coded = newCoded.trim().toLowerCase();
-    if (!real || !coded) {
-      toast.error('Les deux champs sont requis');
-      return;
-    }
-    if (dict.some(e => e.real === real)) {
-      toast.error('Ce mot réel existe déjà dans le dictionnaire');
-      return;
-    }
-    setDict(prev => [...prev, { real, coded }]);
-    setNewReal('');
-    setNewCoded('');
-    toast.success('Entrée ajoutée');
-  };
-
-  const removeEntry = (index: number) => {
-    setDict(prev => prev.filter((_, i) => i !== index));
-    toast.success('Entrée supprimée');
-  };
 
   const encrypt = useCallback(() => {
     if (!inputText.trim()) return;
     const words = inputText.split(/(\s+)/);
     const result = words.map(word => {
       if (/^\s+$/.test(word)) return word;
-      // Preserve punctuation
       const match = word.match(/^([^a-zA-ZÀ-ÿ]*)([a-zA-ZÀ-ÿ]+)([^a-zA-ZÀ-ÿ]*)$/);
       if (!match) return word;
       const [, prefix, core, suffix] = match;
       const lower = core.toLowerCase();
-      const entry = dict.find(e => e.real === lower);
+      const entry = OFFICIAL_DICT.find(e => e.real === lower);
       if (entry) {
-        // Preserve original capitalization pattern
         let coded = entry.coded;
         if (core[0] === core[0].toUpperCase()) {
           coded = coded.charAt(0).toUpperCase() + coded.slice(1);
@@ -181,18 +234,18 @@ const WordCipherPage = () => {
       return word;
     });
     setOutputText(result.join(''));
-  }, [inputText, dict]);
+  }, [inputText]);
 
   const decrypt = useCallback(() => {
     if (!inputText.trim()) return;
     const words = inputText.split(/(\s+)/);
     const result = words.map(word => {
       if (/^\s+$/.test(word)) return word;
-      const match = word.match(/^([^a-zA-ZÀ-ÿ]*)([a-zA-ZÀ-ÿ]+)([^a-zA-ZÀ-ÿ]*)$/);
+      const match = word.match(/^([^a-zA-ZÀ-ÿ]*)([a-zA-ZÀ-ÿ_]+)([^a-zA-ZÀ-ÿ_]*)$/);
       if (!match) return word;
       const [, prefix, core, suffix] = match;
       const lower = core.toLowerCase();
-      const entry = dict.find(e => e.coded === lower);
+      const entry = OFFICIAL_DICT.find(e => e.coded === lower);
       if (entry) {
         let real = entry.real;
         if (core[0] === core[0].toUpperCase()) {
@@ -203,48 +256,14 @@ const WordCipherPage = () => {
       return word;
     });
     setOutputText(result.join(''));
-  }, [inputText, dict]);
-
-  const exportDict = () => {
-    const blob = new Blob([JSON.stringify(dict, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'dictionnaire-ordre.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success('Dictionnaire exporté');
-  };
-
-  const importDict = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const data = JSON.parse(text);
-        if (Array.isArray(data) && data.every(e => e.real && e.coded)) {
-          setDict(data);
-          toast.success(`${data.length} entrées importées`);
-        } else {
-          toast.error('Format de fichier invalide');
-        }
-      } catch {
-        toast.error('Erreur lors de la lecture du fichier');
-      }
-    };
-    input.click();
-  };
+  }, [inputText]);
 
   const copyOutput = () => {
     navigator.clipboard.writeText(outputText);
     toast.success('Copié');
   };
 
-  const filteredDict = dict.filter(e =>
+  const filteredDict = OFFICIAL_DICT.filter(e =>
     e.real.includes(searchTerm.toLowerCase()) || 
     e.coded.includes(searchTerm.toLowerCase())
   );
@@ -259,7 +278,7 @@ const WordCipherPage = () => {
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl tracking-wide mb-3">Codex des Mots</h1>
           <p className="text-muted-foreground text-sm">
-            Chiffrez et déchiffrez vos messages mot à mot avec votre dictionnaire secret
+            Chiffrez et déchiffrez vos messages avec le dictionnaire officiel de l'Ordre
           </p>
         </div>
 
@@ -331,7 +350,7 @@ const WordCipherPage = () => {
                 )}
 
                 <div className="text-xs text-muted-foreground/60 text-center">
-                  {dict.length} mot{dict.length !== 1 ? 's' : ''} dans le dictionnaire
+                  {OFFICIAL_DICT.length} mots dans le dictionnaire officiel
                 </div>
               </CardContent>
             </Card>
@@ -339,86 +358,41 @@ const WordCipherPage = () => {
 
           {/* Dictionary Tab */}
           <TabsContent value="dictionary" className="space-y-4">
-            {/* Add entry */}
-            <Card className="border-gold-dim/20 bg-card/80">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-heading-text tracking-wider text-gold-dim">
-                  Ajouter une entrée
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2 items-end">
-                  <div className="flex-1">
-                    <label className="text-xs text-muted-foreground mb-1 block">Mot réel</label>
-                    <Input
-                      value={newReal}
-                      onChange={(e) => setNewReal(e.target.value)}
-                      placeholder="ex: rendez-vous"
-                      className="cipher-input"
-                      onKeyDown={(e) => e.key === 'Enter' && addEntry()}
-                    />
-                  </div>
-                  <ArrowRightLeft className="w-4 h-4 text-gold-dim/50 shrink-0 mb-2" />
-                  <div className="flex-1">
-                    <label className="text-xs text-muted-foreground mb-1 block">Mot codé</label>
-                    <Input
-                      value={newCoded}
-                      onChange={(e) => setNewCoded(e.target.value)}
-                      placeholder="ex: crépuscule"
-                      className="cipher-input"
-                      onKeyDown={(e) => e.key === 'Enter' && addEntry()}
-                    />
-                  </div>
-                  <Button onClick={addEntry} size="icon" className="shrink-0 bg-gold-dim/20 hover:bg-gold-dim/30 text-gold border border-gold-dim/30">
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Import/Export */}
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={importDict} className="gap-1.5 text-xs border-gold-dim/20 text-gold-dim">
-                <Upload className="w-3.5 h-3.5" />
-                Importer
-              </Button>
-              <Button variant="outline" size="sm" onClick={exportDict} className="gap-1.5 text-xs border-gold-dim/20 text-gold-dim">
-                <Download className="w-3.5 h-3.5" />
-                Exporter
-              </Button>
-            </div>
-
-            {/* Search & List */}
             <Card className="border-gold-dim/20 bg-card/80">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-heading-text tracking-wider text-gold-dim">
-                    Dictionnaire ({dict.length})
+                    Dictionnaire Officiel ({OFFICIAL_DICT.length} entrées)
                   </CardTitle>
+                  <Badge variant="outline" className="text-xs border-gold-dim/40 text-gold-dim">
+                    <Lock className="w-3 h-3 mr-1" />
+                    Scellé
+                  </Badge>
                 </div>
-                {dict.length > 5 && (
-                  <div className="relative mt-2">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Rechercher..."
-                      className="cipher-input pl-8 h-8 text-xs"
-                    />
-                  </div>
-                )}
+                <p className="text-xs text-muted-foreground/50 mt-1">
+                  Ce dictionnaire est fixe et ne peut être modifié. Il est partagé par tous les membres de l'Ordre.
+                </p>
+                <div className="relative mt-2">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Rechercher un mot..."
+                    className="cipher-input pl-8 h-8 text-xs"
+                  />
+                </div>
               </CardHeader>
               <CardContent>
                 {filteredDict.length === 0 ? (
                   <p className="text-center text-muted-foreground/50 text-sm py-6">
-                    {dict.length === 0 ? 'Dictionnaire vide. Ajoutez des mots ci-dessus.' : 'Aucun résultat.'}
+                    Aucun résultat.
                   </p>
                 ) : (
                   <div className="space-y-1.5 max-h-[400px] overflow-y-auto scrollbar-none">
                     {filteredDict.map((entry, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between px-3 py-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors group"
+                        className="flex items-center px-3 py-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
                       >
                         <div className="flex items-center gap-2 text-sm">
                           <Badge variant="outline" className="font-mono text-xs border-gold-dim/30 text-gold-dim">
@@ -429,14 +403,6 @@ const WordCipherPage = () => {
                             {entry.coded}
                           </Badge>
                         </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => removeEntry(idx)}
-                          className="h-6 w-6 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-crimson-bright transition-opacity"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
                       </div>
                     ))}
                   </div>
