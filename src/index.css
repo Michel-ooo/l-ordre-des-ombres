@@ -232,7 +232,7 @@
     opacity: 1;
   }
 
-  @media (min-width: 1280px) {
+  @media (min-width: 1600px) {
     .nav-link-expand .nav-link-label {
       max-width: 120px;
       opacity: 1;
