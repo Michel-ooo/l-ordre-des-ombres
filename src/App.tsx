@@ -23,6 +23,7 @@ import DashboardPage from "./pages/DashboardPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import ActivityFeedPage from "./pages/ActivityFeedPage";
 import ChannelsPage from "./pages/ChannelsPage";
+import WordCipherPage from "./pages/WordCipherPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/sanctuaire" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/cipher" element={<ProtectedRoute><CipherPage /></ProtectedRoute>} />
+            <Route path="/word-cipher" element={<ProtectedRoute><WordCipherPage /></ProtectedRoute>} />
             <Route path="/doctrine" element={<ProtectedRoute><DoctrinePage /></ProtectedRoute>} />
             <Route path="/archives" element={<ProtectedRoute><ArchivesPage /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />

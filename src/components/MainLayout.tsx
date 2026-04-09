@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Settings, BarChart3, Newspaper, Hash } from 'lucide-react';
+import { Settings, BarChart3, Newspaper, Hash, BookKey } from 'lucide-react';
 import { Lock, Scroll, Archive, Home, Shield, LogOut, AlertTriangle, DoorOpen, Mail, Brain, Gavel, Trophy } from 'lucide-react';
 import { CustomContextMenu } from './CustomContextMenu';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +25,7 @@ const navItems = [
   { path: '/channels', label: 'Canaux', icon: Hash },
   { path: '/messages', label: 'Messages', icon: Mail },
   { path: '/cipher', label: 'Chiffrement', icon: Lock },
+  { path: '/word-cipher', label: 'Codex', icon: BookKey },
   { path: '/leaderboard', label: 'Classement', icon: Trophy },
   { path: '/tribunal', label: 'Tribunal', icon: Gavel },
 ];
